@@ -25,6 +25,29 @@ DerivedData/
 # Source project contains built files for the hyperliquid-rust-sdk and swift linked files that we want to copy from the swift CLI test project to the ios build
 source_project
 
+# Private keys - NEVER commit real keys
+BeHype/private-key.key
+*.key
+
+# Rust build artifacts
+target/
+Cargo.lock
+*.rlib
+*.rmeta
+
+# Swift build artifacts
+.build/
+Package.resolved
+.swiftpm/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Rust Framework build artifacts (large binary files)
+BeHype/Frameworks/RustFramework.xcframework/
+*.xcframework/
+*.a
+*.dylib
+
 ## Obj-C/Swift specific
 *.hmap
 
