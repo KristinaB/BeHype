@@ -188,7 +188,7 @@ class HyperliquidService: ObservableObject {
         }
         
         isLoading = true
-        status = "📈 Fetching BTC/USDC candle data..."
+        status = "📈 Fetching BTC/USDC spot candle data..."
         
         DispatchQueue.global(qos: .background).async {
             // Get candles for the last 24 hours (using milliseconds for timestamps)
@@ -196,7 +196,7 @@ class HyperliquidService: ObservableObject {
             let startTime = endTime - (24 * 60 * 60 * 1000) // 24 hours ago in milliseconds
             
             let candles = client.getCandlesSnapshot(
-                coin: "BTC", // Use BTC perpetual, not UBTC/USDC spot pair
+                coin: "@142", // Use @142 for BTC/USDC spot pair (index 142)
                 interval: "1h",
                 startTime: startTime,
                 endTime: endTime
