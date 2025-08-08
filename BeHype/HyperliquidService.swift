@@ -26,20 +26,42 @@ class HyperliquidService: ObservableObject {
     }
     
     func loadPrivateKey() {
-        guard let keyPath = Bundle.main.path(forResource: "private-key", ofType: "key"),
-              let key = try? String(contentsOfFile: keyPath).trimmingCharacters(in: .whitespacesAndNewlines) else {
-            status = "Private key not found. Add private-key.key to bundle"
+        print("🔐 [DEBUG] Starting loadPrivateKey...")
+        
+        guard let keyPath = Bundle.main.path(forResource: "private-key", ofType: "key") else {
+            print("❌ [DEBUG] Bundle.main.path returned nil for private-key.key")
+            status = "Private key file not found in bundle"
             return
         }
         
+        print("✅ [DEBUG] Found key path: \(keyPath)")
+        
+        guard let key = try? String(contentsOfFile: keyPath).trimmingCharacters(in: .whitespacesAndNewlines) else {
+            print("❌ [DEBUG] Failed to read file at path: \(keyPath)")
+            status = "Failed to read private key file"
+            return
+        }
+        
+        print("✅ [DEBUG] Successfully read key file, length: \(key.count)")
+        
         let cleanKey = key.hasPrefix("0x") ? String(key.dropFirst(2)) : key
+        print("🔧 [DEBUG] Cleaned key length: \(cleanKey.count)")
         self.testPrivateKey = cleanKey
         
-        if let sdk = sdk {
-            self.walletClient = sdk.createClientWithWallet(privateKey: cleanKey)
-            self.testAddress = sdk.deriveAddress(from: cleanKey)
-            status = "Wallet loaded: \(String(testAddress.prefix(10)))..."
+        guard let sdk = sdk else {
+            print("❌ [DEBUG] SDK is nil!")
+            status = "SDK not initialized"
+            return
         }
+        
+        print("🚀 [DEBUG] Creating wallet client...")
+        self.walletClient = sdk.createClientWithWallet(privateKey: cleanKey)
+        
+        print("🏠 [DEBUG] Deriving address...")
+        self.testAddress = sdk.deriveAddress(from: cleanKey)
+        
+        print("✅ [DEBUG] Wallet setup complete. Address: \(testAddress)")
+        status = "Wallet loaded: \(String(testAddress.prefix(10)))..."
     }
     
     func fetchExchangeData() {
@@ -72,11 +94,28 @@ class HyperliquidService: ObservableObject {
     }
     
     func checkBalance() {
+        print("💰 [DEBUG] Starting checkBalance...")
+        print("💰 [DEBUG] walletClient: \(walletClient != nil ? "✅ Present" : "❌ Nil")")
+        print("💰 [DEBUG] testAddress: '\(testAddress)' (isEmpty: \(testAddress.isEmpty))")
+        
+        // If wallet not loaded, try loading it first
+        if walletClient == nil || testAddress.isEmpty {
+            print("⚠️ [DEBUG] Wallet not loaded, attempting to load now...")
+            loadPrivateKey()
+            
+            // Check again after loading
+            print("🔄 [DEBUG] After loadPrivateKey:")
+            print("    walletClient: \(walletClient != nil ? "✅ Present" : "❌ Nil")")
+            print("    testAddress: '\(testAddress)' (isEmpty: \(testAddress.isEmpty))")
+        }
+        
         guard let walletClient = walletClient, !testAddress.isEmpty else {
-            status = "❌ Wallet not loaded"
+            print("❌ [DEBUG] Guard failed - wallet not properly loaded even after attempt")
+            status = "❌ Wallet not loaded - check console logs"
             return
         }
         
+        print("✅ [DEBUG] Wallet client and address OK, proceeding...")
         isLoading = true
         status = "Checking balances..."
         
@@ -140,13 +179,16 @@ class HyperliquidService: ObservableObject {
     }
     
     func runFullDemo() {
+        print("🚀 [DEBUG] Starting runFullDemo...")
         loadPrivateKey()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            print("📊 [DEBUG] Running fetchExchangeData after 1s delay...")
             self.fetchExchangeData()
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            print("💰 [DEBUG] Running checkBalance after 3s delay...")
             self.checkBalance()
         }
     }
