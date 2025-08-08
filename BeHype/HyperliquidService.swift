@@ -191,12 +191,12 @@ class HyperliquidService: ObservableObject {
         status = "📈 Fetching BTC/USDC candle data..."
         
         DispatchQueue.global(qos: .background).async {
-            // Get candles for the last 24 hours
-            let endTime = UInt64(Date().timeIntervalSince1970)
-            let startTime = endTime - (24 * 60 * 60) // 24 hours ago
+            // Get candles for the last 24 hours (using milliseconds for timestamps)
+            let endTime = UInt64(Date().timeIntervalSince1970 * 1000) // milliseconds
+            let startTime = endTime - (24 * 60 * 60 * 1000) // 24 hours ago in milliseconds
             
             let candles = client.getCandlesSnapshot(
-                coin: "UBTC/USDC",
+                coin: "BTC", // Use BTC perpetual, not UBTC/USDC spot pair
                 interval: "1h",
                 startTime: startTime,
                 endTime: endTime
