@@ -22,6 +22,9 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
+# Source project contains built files for the hyperliquid-rust-sdk and swift linked files that we want to copy from the swift CLI test project to the ios build
+source_project
+
 ## Obj-C/Swift specific
 *.hmap
 
