@@ -178,6 +178,50 @@ class HyperliquidService: ObservableObject {
         }
     }
     
+    func getCandleData() {
+        print("📈 [DEBUG] Starting getCandleData...")
+        
+        guard let client = client else {
+            print("❌ [DEBUG] Client not initialized")
+            status = "❌ Client not initialized"
+            return
+        }
+        
+        isLoading = true
+        status = "📈 Fetching BTC/USDC candle data..."
+        
+        DispatchQueue.global(qos: .background).async {
+            // Get candles for the last 24 hours
+            let endTime = UInt64(Date().timeIntervalSince1970)
+            let startTime = endTime - (24 * 60 * 60) // 24 hours ago
+            
+            let candles = client.getCandlesSnapshot(
+                coin: "UBTC/USDC",
+                interval: "1h",
+                startTime: startTime,
+                endTime: endTime
+            )
+            
+            DispatchQueue.main.async {
+                print("📈 [DEBUG] Retrieved \(candles.count) candles")
+                
+                if !candles.isEmpty {
+                    let latestCandle = candles.last!
+                    self.status = "📈 Latest BTC price: $\(latestCandle.close) (from \(candles.count) candles)"
+                    
+                    // Log first few candles for debugging
+                    for (index, candle) in candles.prefix(3).enumerated() {
+                        print("📊 [DEBUG] Candle \(index): Open=\(candle.open), Close=\(candle.close), High=\(candle.high), Low=\(candle.low)")
+                    }
+                } else {
+                    self.status = "⚠️ No candle data found"
+                }
+                
+                self.isLoading = false
+            }
+        }
+    }
+    
     func runFullDemo() {
         print("🚀 [DEBUG] Starting runFullDemo...")
         loadPrivateKey()

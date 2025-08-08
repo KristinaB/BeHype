@@ -87,6 +87,12 @@ struct ContentView: View {
                         .disabled(hyperliquidService.isLoading)
                     }
                     
+                    Button("📈 Get Chart Data") {
+                        hyperliquidService.getCandleData()
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(hyperliquidService.isLoading)
+                    
                     Button("🔄 Swap $11 USDC → BTC") {
                         hyperliquidService.performSwap()
                     }

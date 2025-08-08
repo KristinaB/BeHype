@@ -501,6 +501,8 @@ public protocol HyperliquidClientProtocol: AnyObject, Sendable {
     
     func getAllMids()  -> [PriceInfo]
     
+    func getCandlesSnapshot(coin: String, interval: String, startTime: UInt64, endTime: UInt64)  -> [CandleData]
+    
     func getExchangeMeta()  -> ExchangeMeta
     
     func getL2Orderbook(coin: String)  -> OrderbookData
@@ -582,6 +584,17 @@ public static func newWithWallet(privateKey: String) -> HyperliquidClient  {
 open func getAllMids() -> [PriceInfo]  {
     return try!  FfiConverterSequenceTypePriceInfo.lift(try! rustCall() {
     uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_all_mids(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
+open func getCandlesSnapshot(coin: String, interval: String, startTime: UInt64, endTime: UInt64) -> [CandleData]  {
+    return try!  FfiConverterSequenceTypeCandleData.lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_candles_snapshot(self.uniffiClonePointer(),
+        FfiConverterString.lower(coin),
+        FfiConverterString.lower(interval),
+        FfiConverterUInt64.lower(startTime),
+        FfiConverterUInt64.lower(endTime),$0
     )
 })
 }
@@ -747,6 +760,140 @@ public func FfiConverterTypeAssetInfo_lift(_ buf: RustBuffer) throws -> AssetInf
 #endif
 public func FfiConverterTypeAssetInfo_lower(_ value: AssetInfo) -> RustBuffer {
     return FfiConverterTypeAssetInfo.lower(value)
+}
+
+
+public struct CandleData {
+    public var timeOpen: UInt64
+    public var timeClose: UInt64
+    public var coin: String
+    public var interval: String
+    public var `open`: String
+    public var close: String
+    public var high: String
+    public var low: String
+    public var volume: String
+    public var numTrades: UInt64
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(timeOpen: UInt64, timeClose: UInt64, coin: String, interval: String, `open`: String, close: String, high: String, low: String, volume: String, numTrades: UInt64) {
+        self.timeOpen = timeOpen
+        self.timeClose = timeClose
+        self.coin = coin
+        self.interval = interval
+        self.`open` = `open`
+        self.close = close
+        self.high = high
+        self.low = low
+        self.volume = volume
+        self.numTrades = numTrades
+    }
+}
+
+#if compiler(>=6)
+extension CandleData: Sendable {}
+#endif
+
+
+extension CandleData: Equatable, Hashable {
+    public static func ==(lhs: CandleData, rhs: CandleData) -> Bool {
+        if lhs.timeOpen != rhs.timeOpen {
+            return false
+        }
+        if lhs.timeClose != rhs.timeClose {
+            return false
+        }
+        if lhs.coin != rhs.coin {
+            return false
+        }
+        if lhs.interval != rhs.interval {
+            return false
+        }
+        if lhs.`open` != rhs.`open` {
+            return false
+        }
+        if lhs.close != rhs.close {
+            return false
+        }
+        if lhs.high != rhs.high {
+            return false
+        }
+        if lhs.low != rhs.low {
+            return false
+        }
+        if lhs.volume != rhs.volume {
+            return false
+        }
+        if lhs.numTrades != rhs.numTrades {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(timeOpen)
+        hasher.combine(timeClose)
+        hasher.combine(coin)
+        hasher.combine(interval)
+        hasher.combine(`open`)
+        hasher.combine(close)
+        hasher.combine(high)
+        hasher.combine(low)
+        hasher.combine(volume)
+        hasher.combine(numTrades)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeCandleData: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> CandleData {
+        return
+            try CandleData(
+                timeOpen: FfiConverterUInt64.read(from: &buf), 
+                timeClose: FfiConverterUInt64.read(from: &buf), 
+                coin: FfiConverterString.read(from: &buf), 
+                interval: FfiConverterString.read(from: &buf), 
+                open: FfiConverterString.read(from: &buf), 
+                close: FfiConverterString.read(from: &buf), 
+                high: FfiConverterString.read(from: &buf), 
+                low: FfiConverterString.read(from: &buf), 
+                volume: FfiConverterString.read(from: &buf), 
+                numTrades: FfiConverterUInt64.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: CandleData, into buf: inout [UInt8]) {
+        FfiConverterUInt64.write(value.timeOpen, into: &buf)
+        FfiConverterUInt64.write(value.timeClose, into: &buf)
+        FfiConverterString.write(value.coin, into: &buf)
+        FfiConverterString.write(value.interval, into: &buf)
+        FfiConverterString.write(value.`open`, into: &buf)
+        FfiConverterString.write(value.close, into: &buf)
+        FfiConverterString.write(value.high, into: &buf)
+        FfiConverterString.write(value.low, into: &buf)
+        FfiConverterString.write(value.volume, into: &buf)
+        FfiConverterUInt64.write(value.numTrades, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCandleData_lift(_ buf: RustBuffer) throws -> CandleData {
+    return try FfiConverterTypeCandleData.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeCandleData_lower(_ value: CandleData) -> RustBuffer {
+    return FfiConverterTypeCandleData.lower(value)
 }
 
 
@@ -1302,6 +1449,31 @@ fileprivate struct FfiConverterSequenceTypeAssetInfo: FfiConverterRustBuffer {
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
+fileprivate struct FfiConverterSequenceTypeCandleData: FfiConverterRustBuffer {
+    typealias SwiftType = [CandleData]
+
+    public static func write(_ value: [CandleData], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeCandleData.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [CandleData] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [CandleData]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeCandleData.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
 fileprivate struct FfiConverterSequenceTypeOrderLevel: FfiConverterRustBuffer {
     typealias SwiftType = [OrderLevel]
 
@@ -1409,6 +1581,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_all_mids() != 11924) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_candles_snapshot() != 12626) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_exchange_meta() != 12903) {
