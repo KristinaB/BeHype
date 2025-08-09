@@ -68,7 +68,7 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - Professional wallet funding interface with BeHype branding
 - Real QR code generation with BeHype colors and "BH" center logo
 - Wallet address display with monospace font and copy functionality
-- Network warnings and testnet guidance for safe funding
+- Network badge showing mainnet status with warnings
 - Haptic feedback on address copying with clipboard integration
 
 **CandlestickChartView** (`BeHype/Screens/ChartView.swift`):
@@ -94,7 +94,7 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - Rust changes: `rake build_full_rust` then manual Xcode build
 - iOS changes: `rake build` 
 - SwiftUI screens integrate with existing HyperliquidService
-- All trading functionality works with real Hyperliquid testnet
+- All trading functionality works with real Hyperliquid mainnet
 
 ### iOS Debugging Procedure:
 When debugging iOS apps with missing resources or initialization issues:

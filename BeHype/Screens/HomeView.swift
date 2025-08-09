@@ -319,7 +319,7 @@ struct DebugActionsView: View {
 
           Spacer()
 
-          Text("⚠️ Demo mode - Use test funds only")
+          Text("⚠️ Live trading - Mainnet")
             .captionText()
             .foregroundColor(.warningOrange)
             .multilineTextAlignment(.center)

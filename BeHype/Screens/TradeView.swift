@@ -251,7 +251,7 @@ struct TradeView: View {
                 }
             }
             
-            Text("⚠️ This is a demo using test funds")
+            Text("⚠️ Trading with real funds on mainnet")
                 .captionText()
                 .foregroundColor(.warningOrange)
         }

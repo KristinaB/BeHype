@@ -2,7 +2,7 @@
 //  FundWalletView.swift
 //  BeHype
 //
-//  Wallet funding view with QR code and address copying for Hyperliquid testnet
+//  Wallet funding view with QR code and address copying for Hyperliquid mainnet
 //
 
 import SwiftUI
@@ -95,7 +95,7 @@ struct FundWalletView: View {
       Text("Fund Wallet")
         .brandText()
       
-      Text("Send USDC to this address on Hyperliquid Testnet")
+      Text("Send USDC to this address on Hyperliquid")
         .secondaryText()
         .multilineTextAlignment(.center)
     }
@@ -136,16 +136,16 @@ struct FundWalletView: View {
           Spacer()
           
           // Network badge
-          Text("Testnet")
+          Text("Mainnet")
             .font(.caption2)
             .fontWeight(.semibold)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
               RoundedRectangle(cornerRadius: 4)
-                .fill(Color.orange.opacity(0.2))
+                .fill(Color.green.opacity(0.2))
             )
-            .foregroundColor(.orange)
+            .foregroundColor(.green)
         }
         
         // Address display
@@ -190,11 +190,11 @@ struct FundWalletView: View {
         }
         
         VStack(alignment: .leading, spacing: 8) {
-          Text("• Only send USDC to this address on Hyperliquid Testnet")
+          Text("• Only send USDC to this address on Hyperliquid")
             .secondaryText()
-          Text("• This is a testnet address - use only test funds")
+          Text("• This is a mainnet address - use real funds carefully")
             .secondaryText()
-          Text("• Sending mainnet funds will result in permanent loss")
+          Text("• Double-check the address before sending")
             .secondaryText()
           Text("• Always verify the address before sending")
             .secondaryText()
@@ -207,8 +207,8 @@ struct FundWalletView: View {
   
   private func getWalletAddress() -> String {
     // Get the address from the Hyperliquid service
-    // For now, return a placeholder - would need to get actual testnet address
-    return hyperliquidService.testAddress.isEmpty ? "Loading..." : hyperliquidService.testAddress
+    // Get the mainnet address from the service
+    return hyperliquidService.walletAddress.isEmpty ? "Loading..." : hyperliquidService.walletAddress
   }
   
   private func copyAddress() {

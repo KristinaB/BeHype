@@ -12,8 +12,8 @@ class HyperliquidService: ObservableObject {
     private var sdk: HyperliquidSwiftSDK?
     private var client: HyperliquidClient?
     private var walletClient: HyperliquidClient?
-    private var testPrivateKey: String?
-    private(set) var testAddress: String = ""
+    private var privateKey: String?
+    private(set) var walletAddress: String = ""
     
     init() {
         setupSDK()
@@ -46,7 +46,7 @@ class HyperliquidService: ObservableObject {
         
         let cleanKey = key.hasPrefix("0x") ? String(key.dropFirst(2)) : key
         print("🔧 [DEBUG] Cleaned key length: \(cleanKey.count)")
-        self.testPrivateKey = cleanKey
+        self.privateKey = cleanKey
         
         guard let sdk = sdk else {
             print("❌ [DEBUG] SDK is nil!")
@@ -58,10 +58,10 @@ class HyperliquidService: ObservableObject {
         self.walletClient = sdk.createClientWithWallet(privateKey: cleanKey)
         
         print("🏠 [DEBUG] Deriving address...")
-        self.testAddress = sdk.deriveAddress(from: cleanKey)
+        self.walletAddress = sdk.deriveAddress(from: cleanKey)
         
-        print("✅ [DEBUG] Wallet setup complete. Address: \(testAddress)")
-        status = "Wallet loaded: \(String(testAddress.prefix(10)))..."
+        print("✅ [DEBUG] Wallet setup complete. Address: \(walletAddress)")
+        status = "Wallet loaded: \(String(walletAddress.prefix(10)))..."
     }
     
     func fetchExchangeData() {
@@ -96,20 +96,20 @@ class HyperliquidService: ObservableObject {
     func checkBalance() {
         print("💰 [DEBUG] Starting checkBalance...")
         print("💰 [DEBUG] walletClient: \(walletClient != nil ? "✅ Present" : "❌ Nil")")
-        print("💰 [DEBUG] testAddress: '\(testAddress)' (isEmpty: \(testAddress.isEmpty))")
+        print("💰 [DEBUG] walletAddress: '\(walletAddress)' (isEmpty: \(walletAddress.isEmpty))")
         
         // If wallet not loaded, try loading it first
-        if walletClient == nil || testAddress.isEmpty {
+        if walletClient == nil || walletAddress.isEmpty {
             print("⚠️ [DEBUG] Wallet not loaded, attempting to load now...")
             loadPrivateKey()
             
             // Check again after loading
             print("🔄 [DEBUG] After loadPrivateKey:")
             print("    walletClient: \(walletClient != nil ? "✅ Present" : "❌ Nil")")
-            print("    testAddress: '\(testAddress)' (isEmpty: \(testAddress.isEmpty))")
+            print("    walletAddress: '\(walletAddress)' (isEmpty: \(walletAddress.isEmpty))")
         }
         
-        guard let walletClient = walletClient, !testAddress.isEmpty else {
+        guard let walletClient = walletClient, !walletAddress.isEmpty else {
             print("❌ [DEBUG] Guard failed - wallet not properly loaded even after attempt")
             status = "❌ Wallet not loaded - check console logs"
             return
@@ -120,7 +120,7 @@ class HyperliquidService: ObservableObject {
         status = "Checking balances..."
         
         DispatchQueue.global(qos: .background).async {
-            let balances = walletClient.getTokenBalances(address: self.testAddress)
+            let balances = walletClient.getTokenBalances(address: self.walletAddress)
             
             DispatchQueue.main.async {
                 if let usdcBalance = balances.first(where: { $0.coin == "USDC" }) {
