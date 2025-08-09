@@ -168,6 +168,56 @@ struct MarketCard: View {
   }
 }
 
+struct MarketCardWithChart: View {
+  let symbol: String
+  let price: String
+  let change: String
+  let isPositive: Bool
+  let onChartTap: () -> Void
+  
+  var body: some View {
+    AppCard {
+      VStack(spacing: 16) {
+        HStack {
+          VStack(alignment: .leading, spacing: 8) {
+            Text(symbol)
+              .cardTitle()
+
+            Text(price)
+              .priceText()
+          }
+
+          Spacer()
+
+          VStack(alignment: .trailing, spacing: 8) {
+            if isPositive {
+              Text(change)
+                .brandTextSmall()
+            } else {
+              Text(change)
+                .priceText(color: .bearishRed)
+                .fontWeight(.semibold)
+            }
+
+            HStack(spacing: 4) {
+              Image(systemName: isPositive ? "arrow.up.right" : "arrow.down.right")
+                .font(.caption)
+                .foregroundColor(isPositive ? .bullishGreen : .bearishRed)
+            }
+          }
+        }
+        
+        HStack {
+          Spacer()
+          SmallButton("View Chart", icon: "chart.line.uptrend.xyaxis") {
+            onChartTap()
+          }
+        }
+      }
+    }
+  }
+}
+
 // MARK: - Portfolio Card
 
 struct PortfolioCard: View {

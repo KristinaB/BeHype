@@ -139,20 +139,15 @@ struct HomeView: View {
         Text("Markets")
           .sectionTitle()
         Spacer()
-
-        SmallButton("View Chart", icon: "chart.line.uptrend.xyaxis") {
-          showingChart.toggle()
-        }
       }
 
       VStack(spacing: 12) {
-        MarketCard(
+        MarketCardWithChart(
           symbol: "BTC/USDC",
           price: "$\(hyperliquidService.btcPrice)",
           change: "+2.1%",
           isPositive: true
-        )
-        .onTapGesture {
+        ) {
           showingChart.toggle()
         }
 
