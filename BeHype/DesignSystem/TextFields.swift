@@ -109,7 +109,7 @@ struct AmountTextField: View {
                         .foregroundColor(.secondaryText)
                     
                     if onMaxTapped != nil {
-                        SmallButton("MAX") {
+                        OutlineButton("MAX", size: .small) {
                             onMaxTapped?()
                         }
                     }
@@ -175,7 +175,7 @@ struct PriceTextField: View {
                     .keyboardType(.decimalPad)
                 
                 if onMarketTapped != nil {
-                    SmallButton("MARKET") {
+                    OutlineButton("MARKET", size: .small) {
                         onMarketTapped?()
                     }
                 }
