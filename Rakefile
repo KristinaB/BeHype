@@ -26,11 +26,6 @@ task :test_ui_flow do
   Test.ui_flow
 end
 
-desc "Run all tests"
-task :test_all do
-  Test.all
-end
-
 desc "Clean build artifacts"
 task :clean do
   Build.clean

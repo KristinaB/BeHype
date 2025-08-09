@@ -111,3 +111,4 @@ When debugging iOS apps with missing resources or initialization issues:
 - **Test Commands**: `rake test_ui` for all UI tests, `rake test_ui_flow` for main flow only
 - **Screen Coverage**: Home, Trade, Transactions tabs + Chart modal functionality
 - **Automated Validation**: Verifies UI elements load correctly without functional testing
+- **IMPORTANT**: Never run test commands directly - always ask the user to run them and provide the output for analysis
