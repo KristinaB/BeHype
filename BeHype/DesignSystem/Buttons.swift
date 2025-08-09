@@ -263,22 +263,22 @@ struct OutlineButton: View {
     var padding: EdgeInsets {
       switch self {
       case .small:
-        return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+        return EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12)
       case .medium:
-        return EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20)
+        return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
       case .large:
-        return EdgeInsets(top: 16, leading: 24, bottom: 16, trailing: 24)
+        return EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
       }
     }
     
     var fontSize: Font {
       switch self {
       case .small:
-        return .subheadline
+        return .caption
       case .medium:
-        return .headline
+        return .subheadline
       case .large:
-        return .title3
+        return .body
       }
     }
   }
@@ -309,7 +309,7 @@ struct OutlineButton: View {
         } else {
           if let icon = icon {
             Image(systemName: icon)
-              .font(.system(size: 16, weight: .medium))
+              .font(.system(size: 14, weight: .medium))
           }
           Text(title)
             .font(size.fontSize)
