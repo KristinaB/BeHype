@@ -100,7 +100,6 @@ enum ChartTimeframe: String, CaseIterable {
     case oneHour = "1h"
     case fourHours = "4h"
     case oneDay = "1d"
-    case oneWeek = "1w"
     
     var displayName: String {
         switch self {
@@ -108,7 +107,6 @@ enum ChartTimeframe: String, CaseIterable {
         case .oneHour: return "1H"
         case .fourHours: return "4H"
         case .oneDay: return "1D"
-        case .oneWeek: return "1W"
         }
     }
     
@@ -119,7 +117,6 @@ enum ChartTimeframe: String, CaseIterable {
         case .oneHour: return 24 * 7         // 1 week of hourly candles
         case .fourHours: return 24 * 30      // 1 month of 4h candles
         case .oneDay: return 24 * 90         // 3 months of daily candles
-        case .oneWeek: return 24 * 365       // 1 year of weekly candles
         }
     }
 }

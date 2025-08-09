@@ -479,8 +479,6 @@ struct CandlestickChartView: View {
             formatter.dateFormat = "MMM d, HH:mm"
         case .oneDay:
             formatter.dateFormat = "MMM d, yyyy"
-        case .oneWeek:
-            formatter.dateFormat = "MMM d, yyyy"
         }
         
         return formatter.string(from: date)
@@ -492,7 +490,7 @@ struct CandlestickChartView: View {
             return .dateTime.hour().minute()
         case .fourHours:
             return .dateTime.month(.abbreviated).day().hour()
-        case .oneDay, .oneWeek:
+        case .oneDay:
             return .dateTime.month(.abbreviated).day()
         }
     }
