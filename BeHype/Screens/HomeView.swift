@@ -11,6 +11,7 @@ struct HomeView: View {
   @ObservedObject var hyperliquidService: HyperliquidService
   @State private var showingDebugActions = false
   @State private var showingChart = false
+  @State private var showingFundWallet = false
 
   var body: some View {
     NavigationView {
@@ -57,6 +58,9 @@ struct HomeView: View {
       .sheet(isPresented: $showingChart) {
         CandlestickChartView(hyperliquidService: hyperliquidService)
       }
+      .sheet(isPresented: $showingFundWallet) {
+        FundWalletView(hyperliquidService: hyperliquidService)
+      }
     }
     .onAppear {
       loadInitialData()
@@ -102,6 +106,35 @@ struct HomeView: View {
         Text("Hyperliquid Trading")
           .secondaryText()
       }
+      
+      // Fund Wallet Button
+      HStack {
+        Spacer()
+        Button(action: {
+          showingFundWallet.toggle()
+        }) {
+          HStack(spacing: 8) {
+            Image(systemName: "plus.circle.fill")
+              .font(.system(size: 16, weight: .medium))
+            Text("Fund Wallet")
+              .font(.system(size: 16, weight: .semibold))
+          }
+          .foregroundColor(.white)
+          .padding(.horizontal, 20)
+          .padding(.vertical, 12)
+          .background(
+            LinearGradient(
+              colors: [Color.primaryGradientStart, Color.primaryGradientEnd],
+              startPoint: .leading,
+              endPoint: .trailing
+            )
+          )
+          .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 4, x: 0, y: 2)
+        Spacer()
+      }
+      .padding(.bottom, 8)
     }
   }
 

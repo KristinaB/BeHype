@@ -13,7 +13,7 @@ class HyperliquidService: ObservableObject {
     private var client: HyperliquidClient?
     private var walletClient: HyperliquidClient?
     private var testPrivateKey: String?
-    private var testAddress: String = ""
+    private(set) var testAddress: String = ""
     
     init() {
         setupSDK()
