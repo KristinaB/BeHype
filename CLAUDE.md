@@ -112,3 +112,8 @@ When debugging iOS apps with missing resources or initialization issues:
 - **Screen Coverage**: Home, Trade, Transactions tabs + Chart modal functionality
 - **Automated Validation**: Verifies UI elements load correctly without functional testing
 - **IMPORTANT**: Never run test commands directly - always ask the user to run them and provide the output for analysis
+
+### Claude Code Configuration:
+- **Local Settings**: `.claude/settings.local.json` contains project-specific Claude Code configuration
+- **Auto-approved Commands**: Pre-approved bash commands for common development tasks (git, rake, xcodebuild, etc.)
+- **Tool Access**: Configured for iOS development workflow with simulator and testing tools
