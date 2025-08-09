@@ -11,32 +11,32 @@ struct FundWalletView: View {
   @ObservedObject var hyperliquidService: HyperliquidService
   @Environment(\.dismiss) private var dismiss
   @State private var showingCopiedAlert = false
-  
+
   var body: some View {
     NavigationView {
       ZStack {
         Color.appBackground
           .ignoresSafeArea()
-        
+
         ScrollView {
           VStack(spacing: 32) {
             // Header
             headerView
-            
+
             // QR Code section
             qrCodeSection
-            
+
             // Wallet address section
             walletAddressSection
-            
+
             // Network warning section
             networkWarningSection
-            
+
             // Done button
             OutlineButton("Done", size: .large) {
               dismiss()
             }
-            
+
             Spacer(minLength: 20)
           }
           .padding()
@@ -53,15 +53,15 @@ struct FundWalletView: View {
         }
       }
       .alert("Address Copied!", isPresented: $showingCopiedAlert) {
-        Button("OK") { }
+        Button("OK") {}
       } message: {
         Text("The wallet address has been copied to your clipboard.")
       }
     }
   }
-  
+
   // MARK: - View Components
-  
+
   private var headerView: some View {
     VStack(spacing: 16) {
       ZStack {
@@ -86,28 +86,28 @@ struct FundWalletView: View {
               )
           )
           .shadow(color: Color.blue.opacity(0.2), radius: 8, x: 0, y: 4)
-        
+
         Image(systemName: "arrow.down.circle.fill")
           .font(.system(size: 36, weight: .medium))
           .foregroundStyle(LinearGradient.beHypeBrand)
       }
-      
+
       Text("Fund Wallet")
         .brandText()
-      
+
       Text("Send USDC to this address on Hyperliquid")
         .secondaryText()
         .multilineTextAlignment(.center)
     }
     .padding(.top, 20)
   }
-  
+
   private var qrCodeSection: some View {
     AppCard {
       VStack(spacing: 20) {
         Text("Scan QR Code")
           .cardTitle()
-        
+
         // QR Code with BeHype branding
         QRCodeView(
           text: getWalletAddress(),
@@ -118,23 +118,23 @@ struct FundWalletView: View {
             .fill(Color.white)
             .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         )
-        
+
         Text("Point your camera at this QR code")
           .captionText()
           .foregroundColor(.tertiaryText)
       }
     }
   }
-  
+
   private var walletAddressSection: some View {
     AppCard {
       VStack(spacing: 16) {
         HStack {
           Text("Wallet Address")
             .cardTitle()
-          
+
           Spacer()
-          
+
           // Network badge
           Text("Mainnet")
             .font(.caption2)
@@ -147,7 +147,7 @@ struct FundWalletView: View {
             )
             .foregroundColor(.green)
         }
-        
+
         // Address display
         VStack(spacing: 12) {
           // Full address
@@ -157,7 +157,7 @@ struct FundWalletView: View {
               .secondaryText()
               .lineLimit(1)
               .truncationMode(.middle)
-            
+
             Spacer()
           }
           .padding(12)
@@ -165,7 +165,7 @@ struct FundWalletView: View {
             RoundedRectangle(cornerRadius: 8)
               .fill(Color.cardBackground.opacity(0.5))
           )
-          
+
           // Copy button
           OutlineButton("Copy Address", icon: "doc.on.doc", size: .medium) {
             copyAddress()
@@ -174,7 +174,7 @@ struct FundWalletView: View {
       }
     }
   }
-  
+
   private var networkWarningSection: some View {
     AppCard {
       VStack(spacing: 12) {
@@ -182,19 +182,17 @@ struct FundWalletView: View {
           Image(systemName: "exclamationmark.triangle.fill")
             .font(.system(size: 20))
             .foregroundColor(.warningOrange)
-          
+
           Text("Important")
             .cardTitle()
-          
+
           Spacer()
         }
-        
+
         VStack(alignment: .leading, spacing: 8) {
           Text("• Only send USDC to this address on Hyperliquid")
             .secondaryText()
           Text("• This is a mainnet address - use real funds carefully")
-            .secondaryText()
-          Text("• Double-check the address before sending")
             .secondaryText()
           Text("• Always verify the address before sending")
             .secondaryText()
@@ -202,20 +200,21 @@ struct FundWalletView: View {
       }
     }
   }
-  
+
   // MARK: - Private Methods
-  
+
   private func getWalletAddress() -> String {
     // Get the address from the Hyperliquid service
     // Get the mainnet address from the service
-    return hyperliquidService.walletAddress.isEmpty ? "Loading..." : hyperliquidService.walletAddress
+    return hyperliquidService.walletAddress.isEmpty
+      ? "Loading..." : hyperliquidService.walletAddress
   }
-  
+
   private func copyAddress() {
     let address = getWalletAddress()
     UIPasteboard.general.string = address
     showingCopiedAlert = true
-    
+
     // Haptic feedback
     let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
     impactFeedback.impactOccurred()
