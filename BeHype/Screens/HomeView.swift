@@ -258,6 +258,7 @@ struct HomeView: View {
       hyperliquidService.loadPrivateKey()
       await MainActor.run {
         hyperliquidService.fetchExchangeData()
+        hyperliquidService.checkBalance()
       }
     }
   }
