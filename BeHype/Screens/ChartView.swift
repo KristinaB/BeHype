@@ -307,12 +307,12 @@ struct CandlestickChartView: View {
     
     private var chartModifiers: some View {
         candlestickChart
-            .frame(width: max(350, CGFloat(visibleData.count) * 20), height: 400)
+            .frame(width: max(350, CGFloat(visibleData.count) * 20), height: 430)
             .chartYScale(domain: (minPrice * 0.98)...(maxPrice * 1.02))
             .chartXAxis {
-                AxisMarks(values: .automatic(desiredCount: 6)) { value in
+                AxisMarks(values: .automatic(desiredCount: 5)) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.hour().minute())
+                    AxisValueLabel(format: getXAxisFormat())
                 }
             }
             .chartYAxis(.hidden)
@@ -356,7 +356,7 @@ struct CandlestickChartView: View {
             PointMark(x: .value("Date", item.timestamp), y: .value("Price", item.close))
                 .opacity(0)
         }
-        .frame(width: 80, height: 400)
+        .frame(width: 80, height: 430)
         .chartYScale(domain: (minPrice * 0.98)...(maxPrice * 1.02))
         .chartXAxis(.hidden)
         .chartYAxis {
@@ -459,6 +459,17 @@ struct CandlestickChartView: View {
         }
         
         return formatter.string(from: date)
+    }
+    
+    private func getXAxisFormat() -> Date.FormatStyle {
+        switch selectedTimeframe {
+        case .fifteenMinutes, .oneHour:
+            return .dateTime.hour().minute()
+        case .fourHours:
+            return .dateTime.month(.abbreviated).day().hour()
+        case .oneDay, .oneWeek:
+            return .dateTime.month(.abbreviated).day()
+        }
     }
 }
 
