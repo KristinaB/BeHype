@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo run:*)",
+      "Bash(find:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo:*)"
+    ],
+    "deny": []
+  }
+}

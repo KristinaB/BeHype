@@ -1,0 +1,56 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# Debug
+/debug/
+/release/
+
+# Backup files
+*.orig
+*.rej
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment variables
+.env
+.env.local
+
+# Testing
+tarpaulin-report.html
+cobertura.xml
+
+# Documentation
+/doc/
+
+# Swift Package build files
+HyperliquidSdkSwift/.build/
+HyperliquidSdkSwift/.swiftpm/
+HyperliquidSdkSwift/Package.resolved
+HyperliquidSdkSwift/DerivedData/
+HyperliquidSdkSwift/*.xcodeproj
+HyperliquidSdkSwift/*.xcworkspace
+
+# Generated UniFFI bindings
+generated/
+*.swiftmodule
+*.swiftdoc
+*.dylib
+RustFramework.xcframework/

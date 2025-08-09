@@ -23,7 +23,13 @@ DerivedData/
 !default.perspectivev3
 
 # Source project contains built files for the hyperliquid-rust-sdk and swift linked files that we want to copy from the swift CLI test project to the ios build
-source_project
+source_project/rust/generated
+source_project/rust/target
+source_project/rust/HyperliquidSdkSwift
+source_project2
+source_project3
+
+
 
 # Private keys - NEVER commit real keys
 BeHype/private-key.key
