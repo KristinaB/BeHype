@@ -9,7 +9,8 @@
       "Bash(cp:*)",
       "Bash(rm:*)",
       "Bash(rake:*)",
-      "Bash(cargo doc:*)"
+      "Bash(cargo doc:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }

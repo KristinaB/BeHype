@@ -36,7 +36,7 @@ class HyperliquidService: ObservableObject {
         
         print("✅ [DEBUG] Found key path: \(keyPath)")
         
-        guard let key = try? String(contentsOfFile: keyPath).trimmingCharacters(in: .whitespacesAndNewlines) else {
+        guard let key = try? String(contentsOfFile: keyPath, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines) else {
             print("❌ [DEBUG] Failed to read file at path: \(keyPath)")
             status = "Failed to read private key file"
             return
