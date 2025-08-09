@@ -246,3 +246,137 @@ struct FilterButton: View {
     .buttonStyle(PlainButtonStyle())
   }
 }
+
+// MARK: - Outline Button (Pill-shaped with gradient outline)
+
+struct OutlineButton: View {
+  let title: String
+  let icon: String?
+  let size: ButtonSize
+  let isLoading: Bool
+  let isDisabled: Bool
+  let action: () -> Void
+  
+  enum ButtonSize {
+    case small, medium, large
+    
+    var padding: EdgeInsets {
+      switch self {
+      case .small:
+        return EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+      case .medium:
+        return EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20)
+      case .large:
+        return EdgeInsets(top: 16, leading: 24, bottom: 16, trailing: 24)
+      }
+    }
+    
+    var fontSize: Font {
+      switch self {
+      case .small:
+        return .subheadline
+      case .medium:
+        return .headline
+      case .large:
+        return .title3
+      }
+    }
+  }
+  
+  init(
+    _ title: String,
+    icon: String? = nil,
+    size: ButtonSize = .medium,
+    isLoading: Bool = false,
+    isDisabled: Bool = false,
+    action: @escaping () -> Void
+  ) {
+    self.title = title
+    self.icon = icon
+    self.size = size
+    self.isLoading = isLoading
+    self.isDisabled = isDisabled
+    self.action = action
+  }
+  
+  var body: some View {
+    Button(action: action) {
+      HStack(spacing: 8) {
+        if isLoading {
+          ProgressView()
+            .progressViewStyle(CircularProgressViewStyle(tint: .primaryText))
+            .scaleEffect(0.8)
+        } else {
+          if let icon = icon {
+            Image(systemName: icon)
+              .font(.system(size: 16, weight: .medium))
+          }
+          Text(title)
+            .font(size.fontSize)
+            .fontWeight(.semibold)
+        }
+      }
+      .foregroundColor(.primaryText)
+      .padding(size.padding)
+      .background(
+        ZStack {
+          // Glass effect background with translucent fill
+          Capsule()
+            .fill(
+              LinearGradient(
+                colors: [
+                  Color.white.opacity(0.15),
+                  Color.white.opacity(0.08),
+                  Color.white.opacity(0.05)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+              )
+            )
+          
+          // Blue-green glow overlay
+          Capsule()
+            .fill(
+              LinearGradient(
+                colors: [
+                  Color.blue.opacity(0.1),
+                  Color.cyan.opacity(0.08),
+                  Color.green.opacity(0.05),
+                  Color.clear
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+              )
+            )
+          
+          // BeHype gradient outline
+          Capsule()
+            .strokeBorder(
+              LinearGradient.beHypeBrand.opacity(0.8),
+              lineWidth: 2
+            )
+          
+          // Glass highlight on top edge
+          Capsule()
+            .strokeBorder(
+              LinearGradient(
+                colors: [
+                  Color.white.opacity(0.4),
+                  Color.white.opacity(0.2),
+                  Color.clear
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+              ),
+              lineWidth: 1
+            )
+        }
+        .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
+        .shadow(color: Color.cyan.opacity(0.2), radius: 4, x: 0, y: 2)
+      )
+    }
+    .disabled(isDisabled || isLoading)
+    .opacity(isDisabled ? 0.6 : 1.0)
+    .buttonStyle(PlainButtonStyle())
+  }
+}

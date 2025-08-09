@@ -110,28 +110,13 @@ struct HomeView: View {
       // Fund Wallet Button
       HStack {
         Spacer()
-        Button(action: {
+        OutlineButton(
+          "Fund Wallet",
+          icon: "plus.circle.fill",
+          size: .large
+        ) {
           showingFundWallet.toggle()
-        }) {
-          HStack(spacing: 8) {
-            Image(systemName: "plus.circle.fill")
-              .font(.system(size: 16, weight: .medium))
-            Text("Fund Wallet")
-              .font(.system(size: 16, weight: .semibold))
-          }
-          .foregroundColor(.white)
-          .padding(.horizontal, 20)
-          .padding(.vertical, 12)
-          .background(
-            LinearGradient(
-              colors: [Color.primaryGradientStart, Color.primaryGradientEnd],
-              startPoint: .leading,
-              endPoint: .trailing
-            )
-          )
-          .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .shadow(color: Color.primaryGradientStart.opacity(0.3), radius: 4, x: 0, y: 2)
         Spacer()
       }
       .padding(.bottom, 8)

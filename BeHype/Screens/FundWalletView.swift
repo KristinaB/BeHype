@@ -33,7 +33,7 @@ struct FundWalletView: View {
             networkWarningSection
             
             // Done button
-            PrimaryButton("Done") {
+            OutlineButton("Done", size: .large) {
               dismiss()
             }
             
@@ -167,7 +167,7 @@ struct FundWalletView: View {
           )
           
           // Copy button
-          SecondaryButton("Copy Address") {
+          OutlineButton("Copy Address", icon: "doc.on.doc", size: .medium) {
             copyAddress()
           }
         }
