@@ -131,3 +131,7 @@ iOSInjectionProject/
 # IDEs
 .vscode/
 .idea/
+
+# Xcode project user and shared data
+BeHype.xcodeproj/xcuserdata/
+BeHype.xcodeproj/xcshareddata/
