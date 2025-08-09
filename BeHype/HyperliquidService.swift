@@ -178,6 +178,23 @@ class HyperliquidService: ObservableObject {
         }
     }
     
+    func getCandles(interval: String, hoursBack: Int) -> [CandleData] {
+        guard let client = client else {
+            print("❌ [DEBUG] Client not initialized")
+            return []
+        }
+        
+        let endTime = UInt64(Date().timeIntervalSince1970 * 1000)
+        let startTime = endTime - UInt64(hoursBack * 60 * 60 * 1000)
+        
+        return client.getCandlesSnapshot(
+            coin: "@142", // BTC/USDC spot
+            interval: interval,
+            startTime: startTime,
+            endTime: endTime
+        )
+    }
+    
     func getCandleData() {
         print("📈 [DEBUG] Starting getCandleData...")
         

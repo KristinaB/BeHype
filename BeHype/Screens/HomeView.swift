@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeView: View {
     @ObservedObject var hyperliquidService: HyperliquidService
     @State private var showingDebugActions = false
+    @State private var showingChart = false
     
     var body: some View {
         NavigationView {
@@ -50,6 +51,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingDebugActions) {
                 DebugActionsView(hyperliquidService: hyperliquidService)
+            }
+            .sheet(isPresented: $showingChart) {
+                CandlestickChartView(hyperliquidService: hyperliquidService)
             }
         }
         .onAppear {
@@ -133,6 +137,10 @@ struct HomeView: View {
                 Text("Markets")
                     .sectionTitle()
                 Spacer()
+                
+                SmallButton("View Chart", icon: "chart.line.uptrend.xyaxis") {
+                    showingChart.toggle()
+                }
             }
             
             VStack(spacing: 12) {
@@ -142,6 +150,9 @@ struct HomeView: View {
                     change: "+2.1%",
                     isPositive: true
                 )
+                .onTapGesture {
+                    showingChart.toggle()
+                }
                 
                 MarketCard(
                     symbol: "Exchange Assets",
