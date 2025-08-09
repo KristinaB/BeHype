@@ -54,6 +54,31 @@ struct CandlestickChartView: View {
         visibleData.map { $0.high }.max() ?? 100
     }
     
+    /// Calculate optimal spacing between candles based on count
+    var candleSpacing: CGFloat {
+        let count = visibleData.count
+        if count < 20 {
+            return 24  // Wide spacing for few candles
+        } else if count < 50 {
+            return 18  // Medium spacing
+        } else if count < 100 {
+            return 14  // Closer spacing for more candles
+        } else {
+            return 10  // Tight spacing for many candles
+        }
+    }
+    
+    /// Calculate candle width based on spacing
+    var candleWidth: CGFloat {
+        return max(6, candleSpacing - 4)  // Candle width is spacing minus 4px gap, minimum 6px
+    }
+    
+    /// Calculate total chart width
+    var chartWidth: CGFloat {
+        let calculatedWidth = CGFloat(visibleData.count) * candleSpacing
+        return max(350, calculatedWidth)  // Minimum width of 350px
+    }
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -295,7 +320,7 @@ struct CandlestickChartView: View {
     
     private var candlestickChart: some View {
         Chart(visibleData) { item in
-            CandlestickMark(data: item, width: 12)
+            CandlestickMark(data: item, width: candleWidth)
             
             if item.id == selectedData?.id {
                 RuleMark(x: .value("Selected", item.timestamp))
@@ -307,7 +332,7 @@ struct CandlestickChartView: View {
     
     private var chartModifiers: some View {
         candlestickChart
-            .frame(width: max(350, CGFloat(visibleData.count) * 20), height: 430)
+            .frame(width: chartWidth, height: 430)
             .chartYScale(domain: (minPrice * 0.98)...(maxPrice * 1.02))
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 5)) { value in
