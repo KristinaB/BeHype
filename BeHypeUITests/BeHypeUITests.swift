@@ -86,8 +86,13 @@ final class BeHypeUITests: XCTestCase {
         
         // Verify order summary section
         XCTAssertTrue(app.staticTexts["Order Summary"].exists, "Order Summary section should exist")
-        XCTAssertTrue(app.staticTexts["Estimated Total"].exists, "Estimated Total should exist")
-        XCTAssertTrue(app.staticTexts["Estimated Receive"].exists, "Estimated Receive should exist")
+        
+        // Check for either "Estimated Receive" (buy) or "Estimated Value" (sell)
+        let hasEstimatedReceive = app.staticTexts["Estimated Receive"].exists
+        let hasEstimatedValue = app.staticTexts["Estimated Value"].exists
+        XCTAssertTrue(hasEstimatedReceive || hasEstimatedValue, "Should have either Estimated Receive or Estimated Value")
+        
+        XCTAssertTrue(app.staticTexts["Est. Fees"].exists, "Est. Fees should exist")
     }
     
     private func testTransactionsScreen(_ app: XCUIApplication) {

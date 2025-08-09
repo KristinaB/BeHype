@@ -21,6 +21,11 @@ task :test_ui do
   Test.ui
 end
 
+desc "Run complete UI flow test only"
+task :test_ui_flow do
+  Test.ui_flow
+end
+
 desc "Run all tests"
 task :test_all do
   Test.all

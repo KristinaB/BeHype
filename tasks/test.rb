@@ -11,6 +11,11 @@ class Test
     system("xcodebuild test -scheme #{SCHEME} -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BeHypeUITests")
   end
 
+  def self.ui_flow
+    puts "Running complete UI flow test..."
+    system("xcodebuild test -scheme #{SCHEME} -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:BeHypeUITests/BeHypeUITests/testCompleteUIFlow")
+  end
+
   def self.all
     puts "Running all tests..."
     system("xcodebuild test -scheme #{SCHEME} -destination 'platform=iOS Simulator,name=iPhone 16'")
