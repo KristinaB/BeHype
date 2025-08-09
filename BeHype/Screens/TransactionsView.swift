@@ -11,7 +11,6 @@ struct TransactionsView: View {
     @ObservedObject var hyperliquidService: HyperliquidService
     @State private var selectedFilter: TransactionFilter = .all
     @State private var searchText = ""
-    @State private var transactions: [Transaction] = []
     
     var body: some View {
         NavigationView {
@@ -24,10 +23,10 @@ struct TransactionsView: View {
                     filterSection
                     
                     // Transaction List
-                    if filteredTransactions.isEmpty {
+                    if filteredFills.isEmpty {
                         emptyStateView
                     } else {
-                        transactionList
+                        fillsList
                     }
                 }
             }
@@ -36,16 +35,16 @@ struct TransactionsView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     IconButton(icon: "arrow.clockwise") {
-                        refreshTransactions()
+                        hyperliquidService.fetchUserFills()
                     }
                 }
             }
         }
         .onAppear {
-            loadTransactions()
+            hyperliquidService.fetchUserFills()
         }
         .onChange(of: hyperliquidService.lastSwapResult) {
-            loadTransactions()
+            hyperliquidService.fetchUserFills()
         }
     }
     
@@ -85,11 +84,11 @@ struct TransactionsView: View {
         }
     }
     
-    private var transactionList: some View {
+    private var fillsList: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(filteredTransactions) { transaction in
-                    TransactionRow(transaction: transaction)
+                ForEach(filteredFills, id: \.hash) { fill in
+                    FillRow(fill: fill)
                         .padding(.horizontal)
                 }
             }
@@ -132,131 +131,72 @@ struct TransactionsView: View {
     
     // MARK: - Computed Properties
     
-    private var filteredTransactions: [Transaction] {
-        let filtered = transactions.filter { transaction in
+    private var filteredFills: [UserFill] {
+        let allFills = hyperliquidService.userFills
+        
+        let filtered = allFills.filter { fill in
             // Apply filter
             switch selectedFilter {
             case .all:
                 break
             case .pending:
-                if transaction.status != .pending { return false }
+                // For real fills, we only show completed ones, so skip pending filter
+                return false
             case .confirmed:
-                if transaction.status != .confirmed { return false }
+                // All fills are confirmed
+                break
             case .failed:
-                if transaction.status != .failed { return false }
+                // For real fills, we only get successful ones, so skip failed filter  
+                return false
             case .buys:
-                if transaction.type != .buy { return false }
+                if !fill.isBuy { return false }
             case .sells:
-                if transaction.type != .sell { return false }
+                if fill.isBuy { return false }
             }
             
             // Apply search
             if !searchText.isEmpty {
                 let searchLower = searchText.lowercased()
-                return transaction.pair.lowercased().contains(searchLower) ||
-                       transaction.id.lowercased().contains(searchLower) ||
-                       transaction.type.displayText.lowercased().contains(searchLower)
+                return fill.displayCoin.lowercased().contains(searchLower) ||
+                       fill.hash.lowercased().contains(searchLower) ||
+                       fill.displaySide.lowercased().contains(searchLower)
             }
             
             return true
         }
         
-        return filtered.sorted { $0.timestamp > $1.timestamp }
+        return filtered.sorted { $0.time > $1.time }
     }
     
     // MARK: - Private Methods
     
-    private func loadTransactions() {
-        // Create sample transactions based on service state
-        var sampleTransactions: [Transaction] = []
-        
-        // Add transaction from last swap result
-        if !hyperliquidService.lastSwapResult.isEmpty {
-            let isSuccess = hyperliquidService.lastSwapResult.contains("✅")
-            sampleTransactions.append(
-                Transaction(
-                    id: "tx_\(Date().timeIntervalSince1970)",
-                    pair: "BTC/USDC",
-                    type: .buy,
-                    amount: "11.00",
-                    price: hyperliquidService.btcPrice,
-                    total: "11.00",
-                    status: isSuccess ? .confirmed : .failed,
-                    timestamp: Date(),
-                    fee: "0.05"
-                )
-            )
-        }
-        
-        // Add some sample historical transactions
-        let sampleData = [
-            ("BTC/USDC", TransactionType.buy, "25.00", "45000.00", StatusType.confirmed, -3600),
-            ("BTC/USDC", TransactionType.sell, "0.0005", "46000.00", StatusType.confirmed, -7200),
-            ("BTC/USDC", TransactionType.buy, "50.00", "44500.00", StatusType.pending, -10800),
-            ("BTC/USDC", TransactionType.buy, "15.00", "45200.00", StatusType.failed, -14400)
-        ]
-        
-        for (index, data) in sampleData.enumerated() {
-            sampleTransactions.append(
-                Transaction(
-                    id: "tx_sample_\(index)",
-                    pair: data.0,
-                    type: data.1,
-                    amount: data.2,
-                    price: data.3,
-                    total: calculateTotal(amount: data.2, price: data.3, type: data.1),
-                    status: data.4,
-                    timestamp: Date().addingTimeInterval(TimeInterval(data.5)),
-                    fee: "0.05"
-                )
-            )
-        }
-        
-        transactions = sampleTransactions
-    }
-    
-    private func refreshTransactions() {
-        loadTransactions()
-    }
-    
-    private func calculateTotal(amount: String, price: String, type: TransactionType) -> String {
-        let amountValue = Double(amount) ?? 0
-        let priceValue = Double(price) ?? 0
-        
-        if type == .buy {
-            return String(format: "%.2f", amountValue)
-        } else {
-            return String(format: "%.2f", amountValue * priceValue)
-        }
-    }
-    
     private func getEmptyStateTitle() -> String {
         switch selectedFilter {
         case .all:
-            return "No Transactions Yet"
+            return "No Fills Yet"
         case .pending:
-            return "No Pending Transactions"
+            return "No Pending Fills"
         case .confirmed:
-            return "No Confirmed Transactions"
+            return "No Confirmed Fills"
         case .failed:
-            return "No Failed Transactions"
+            return "No Failed Fills"
         case .buys:
-            return "No Buy Orders"
+            return "No Buy Fills"
         case .sells:
-            return "No Sell Orders"
+            return "No Sell Fills"
         }
     }
     
     private func getEmptyStateSubtitle() -> String {
         switch selectedFilter {
         case .all:
-            return "Start trading to see your transaction history here."
+            return "Start trading to see your fill history here."
         case .pending:
-            return "All your transactions have been processed."
+            return "All your fills have been processed."
         case .confirmed:
-            return "You don't have any confirmed transactions yet."
+            return "You don't have any confirmed fills yet."
         case .failed:
-            return "No failed transactions found."
+            return "No failed fills found."
         case .buys:
             return "You haven't made any buy orders yet."
         case .sells:
@@ -265,50 +205,58 @@ struct TransactionsView: View {
     }
 }
 
-// MARK: - Transaction Row
+// MARK: - Fill Row
 
-struct TransactionRow: View {
-    let transaction: Transaction
+struct FillRow: View {
+    let fill: UserFill
     
     var body: some View {
         AppCard {
             HStack {
-                // Transaction Icon and Type
+                // Fill Icon and Type
                 VStack(spacing: 8) {
                     ZStack {
                         Circle()
-                            .fill(transaction.type.color.opacity(0.2))
+                            .fill((fill.isBuy ? Color.bullishGreen : Color.bearishRed).opacity(0.2))
                             .frame(width: 40, height: 40)
                         
-                        Image(systemName: transaction.type.icon)
+                        Image(systemName: fill.isBuy ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
                             .font(.headline)
-                            .foregroundColor(transaction.type.color)
+                            .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
                     }
                     
-                    Text(transaction.status.displayText)
-                        .statusText(status: transaction.status)
+                    Text("FILLED")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.bullishGreen)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.bullishGreen.opacity(0.2))
+                        )
                 }
                 
-                // Transaction Details
+                // Fill Details
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text(transaction.pair)
+                        Text(fill.displayCoin)
                             .cardTitle()
                         
                         Spacer()
                         
-                        Text(transaction.type.displayText.uppercased())
+                        Text(fill.displaySide.uppercased())
                             .font(.caption)
                             .fontWeight(.bold)
-                            .foregroundColor(transaction.type.color)
+                            .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
                     }
                     
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Amount")
+                            Text("Size")
                                 .captionText()
                             
-                            Text("\(transaction.amount) \(transaction.type == .buy ? "USDC" : "BTC")")
+                            Text("\(fill.sz) \(fill.isBuy ? "USDC" : "BTC")")
                                 .secondaryText()
                                 .fontWeight(.medium)
                         }
@@ -319,7 +267,7 @@ struct TransactionRow: View {
                             Text("Price")
                                 .captionText()
                             
-                            Text("$\(transaction.price)")
+                            Text(fill.displayPrice)
                                 .secondaryText()
                                 .fontWeight(.medium)
                         }
@@ -327,23 +275,23 @@ struct TransactionRow: View {
                         Spacer()
                         
                         VStack(alignment: .trailing, spacing: 4) {
-                            Text(transaction.type == .buy ? "Receive" : "Total")
+                            Text("Value")
                                 .captionText()
                             
-                            Text(formatTransactionValue())
+                            Text(formatFillValue())
                                 .priceText()
                                 .font(.subheadline)
                         }
                     }
                     
                     HStack {
-                        Text(formatTimestamp(transaction.timestamp))
+                        Text(fill.formattedDate)
                             .captionText()
                         
                         Spacer()
                         
-                        if let fee = transaction.fee {
-                            Text("Fee: $\(fee)")
+                        if let fee = fill.fee, let feeToken = fill.feeToken {
+                            Text("Fee: \(fee) \(feeToken)")
                                 .captionText()
                         }
                     }
@@ -352,22 +300,19 @@ struct TransactionRow: View {
         }
     }
     
-    private func formatTransactionValue() -> String {
-        if transaction.type == .buy {
-            let amount = Double(transaction.amount) ?? 0
-            let price = Double(transaction.price) ?? 0
-            let btcReceived = amount / price
+    private func formatFillValue() -> String {
+        let sizeValue = Double(fill.sz) ?? 0
+        let priceValue = Double(fill.px) ?? 0
+        
+        if fill.isBuy {
+            // For buy orders, show BTC received
+            let btcReceived = sizeValue / priceValue
             return String(format: "%.6f BTC", btcReceived)
         } else {
-            return "$\(transaction.total)"
+            // For sell orders, show USDC received  
+            let usdcReceived = sizeValue * priceValue
+            return String(format: "%.2f USDC", usdcReceived)
         }
-    }
-    
-    private func formatTimestamp(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 
@@ -388,42 +333,6 @@ enum TransactionFilter: CaseIterable {
     }
 }
 
-enum TransactionType: CaseIterable {
-    case buy, sell
-    
-    var displayText: String {
-        switch self {
-        case .buy: return "Buy"
-        case .sell: return "Sell"
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .buy: return "arrow.up.circle.fill"
-        case .sell: return "arrow.down.circle.fill"
-        }
-    }
-    
-    var color: Color {
-        switch self {
-        case .buy: return .bullishGreen
-        case .sell: return .bearishRed
-        }
-    }
-}
-
-struct Transaction: Identifiable {
-    let id: String
-    let pair: String
-    let type: TransactionType
-    let amount: String
-    let price: String
-    let total: String
-    let status: StatusType
-    let timestamp: Date
-    let fee: String?
-}
 
 #Preview {
     TransactionsView(hyperliquidService: HyperliquidService())

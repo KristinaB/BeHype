@@ -289,6 +289,56 @@ impl HyperliquidClient {
             })
             .collect()
     }
+    
+    pub fn get_user_fills_by_time(&self, address: String, start_time: u64, end_time: Option<u64>) -> Vec<UserFill> {
+        let _info = self.info.clone();
+        let fills_result = self.runtime.block_on(async move {
+            let addr: ethers::types::H160 = address.parse().expect("Invalid address");
+            
+            // Make raw API request for user fills by time
+            let request_body = serde_json::json!({
+                "type": "userFillsByTime",
+                "user": format!("{:#x}", addr),
+                "startTime": start_time,
+                "endTime": end_time
+            });
+            
+            // Use the info client's internal request method
+            let client = reqwest::Client::new();
+            let response = client
+                .post("https://api.hyperliquid.xyz/info")
+                .json(&request_body)
+                .send()
+                .await
+                .expect("Failed to send request");
+            
+            let fills: Vec<serde_json::Value> = response
+                .json()
+                .await
+                .expect("Failed to parse response");
+            
+            fills
+        });
+        
+        fills_result.iter()
+            .map(|fill| UserFill {
+                coin: fill["coin"].as_str().unwrap_or("").to_string(),
+                px: fill["px"].as_str().unwrap_or("0.0").to_string(),
+                sz: fill["sz"].as_str().unwrap_or("0.0").to_string(),
+                side: fill["side"].as_str().unwrap_or("").to_string(),
+                time: fill["time"].as_u64().unwrap_or(0),
+                start_position: fill["startPosition"].as_str().unwrap_or("0.0").to_string(),
+                dir: fill["dir"].as_str().unwrap_or("").to_string(),
+                closed_pnl: fill["closedPnl"].as_str().unwrap_or("0.0").to_string(),
+                hash: fill["hash"].as_str().unwrap_or("").to_string(),
+                oid: fill["oid"].as_u64().unwrap_or(0),
+                crossed: fill["crossed"].as_bool().unwrap_or(false),
+                fee: fill["fee"].as_str().map(|s| s.to_string()),
+                tid: fill["tid"].as_u64(),
+                fee_token: fill["feeToken"].as_str().map(|s| s.to_string()),
+            })
+            .collect()
+    }
 }
 
 #[derive(uniffi::Record)]
@@ -349,6 +399,24 @@ pub struct CandleData {
     pub low: String,
     pub volume: String,
     pub num_trades: u64,
+}
+
+#[derive(uniffi::Record)]
+pub struct UserFill {
+    pub coin: String,
+    pub px: String,
+    pub sz: String,
+    pub side: String,
+    pub time: u64,
+    pub start_position: String,
+    pub dir: String,
+    pub closed_pnl: String,
+    pub hash: String,
+    pub oid: u64,
+    pub crossed: bool,
+    pub fee: Option<String>,
+    pub tid: Option<u64>,
+    pub fee_token: Option<String>,
 }
 
 #[uniffi::export]
