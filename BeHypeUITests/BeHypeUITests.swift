@@ -73,11 +73,12 @@ final class BeHypeUITests: XCTestCase {
         
         // Verify trading pair header
         XCTAssertTrue(app.staticTexts["BTC/USDC"].exists, "Trading pair should be displayed")
-        XCTAssertTrue(app.staticTexts["Spot Trading"].exists, "Spot trading label should exist")
+        XCTAssertTrue(app.staticTexts["24h Volume"].exists, "24h Volume label should exist")
         
         // Verify order type selector
-        XCTAssertTrue(app.buttons["Buy"].exists, "Buy button should exist")
-        XCTAssertTrue(app.buttons["Sell"].exists, "Sell button should exist")
+        XCTAssertTrue(app.staticTexts["Order Type"].exists, "Order Type section should exist")
+        XCTAssertTrue(app.buttons["BUY"].exists, "BUY button should exist")
+        XCTAssertTrue(app.buttons["SELL"].exists, "SELL button should exist")
         
         // Verify form fields (without interacting)
         XCTAssertTrue(app.staticTexts["Amount"].exists, "Amount label should exist")
