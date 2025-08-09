@@ -42,8 +42,8 @@ struct HomeView: View {
           .padding()
         }
       }
-      .navigationTitle("BeHype")
-      .navigationBarTitleDisplayMode(.large)
+      .navigationTitle("")
+      .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
           IconButton(icon: "gearshape.fill") {
@@ -107,29 +107,21 @@ struct HomeView: View {
 
   private var portfolioSection: some View {
     VStack(spacing: 16) {
-      HStack {
-        Text("Portfolio")
-          .sectionTitle()
-        Spacer()
-      }
+      PortfolioCard(
+        title: "USDC Balance",
+        balance: hyperliquidService.usdcBalance,
+        value: "$\(hyperliquidService.usdcBalance)",
+        change: nil,
+        isPositive: nil
+      )
 
-      VStack(spacing: 12) {
-        PortfolioCard(
-          title: "USDC Balance",
-          balance: hyperliquidService.usdcBalance,
-          value: "$\(hyperliquidService.usdcBalance)",
-          change: nil,
-          isPositive: nil
-        )
-
-        PortfolioCard(
-          title: "Total Portfolio Value",
-          balance: "$\(calculateTotalValue())",
-          value: "≈ \(hyperliquidService.usdcBalance) USDC",
-          change: nil,
-          isPositive: nil
-        )
-      }
+      PortfolioCard(
+        title: "Total Portfolio Value",
+        balance: "$\(calculateTotalValue())",
+        value: "≈ \(hyperliquidService.usdcBalance) USDC",
+        change: nil,
+        isPositive: nil
+      )
     }
   }
 
