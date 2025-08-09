@@ -74,9 +74,9 @@ extension LinearGradient {
     /// BeHype brand gradient
     static let beHypeBrand = LinearGradient(
         colors: [
-            Color.purple,
             Color.blue,
-            Color.cyan
+            Color.cyan,
+            Color.green
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing

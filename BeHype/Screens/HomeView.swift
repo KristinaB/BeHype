@@ -82,7 +82,7 @@ struct HomeView: View {
                                 lineWidth: 3
                             )
                     )
-                    .shadow(color: Color.purple.opacity(0.3), radius: 8, x: 0, y: 4)
+                    .shadow(color: Color.blue.opacity(0.3), radius: 8, x: 0, y: 4)
                 
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 48, weight: .medium))
