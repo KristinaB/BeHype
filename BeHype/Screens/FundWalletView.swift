@@ -108,21 +108,16 @@ struct FundWalletView: View {
         Text("Scan QR Code")
           .cardTitle()
         
-        // QR Code placeholder - would need to implement QRCodeView
-        RoundedRectangle(cornerRadius: 12)
-          .fill(Color.white)
-          .frame(width: 200, height: 200)
-          .overlay(
-            VStack {
-              Image(systemName: "qrcode")
-                .font(.system(size: 80))
-                .foregroundColor(.gray)
-              Text("QR Code")
-                .font(.caption)
-                .foregroundColor(.gray)
-            }
-          )
-          .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        // QR Code with BeHype branding
+        QRCodeView(
+          text: getWalletAddress(),
+          size: CGSize(width: 200, height: 200)
+        )
+        .background(
+          RoundedRectangle(cornerRadius: 12)
+            .fill(Color.white)
+            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        )
         
         Text("Point your camera at this QR code")
           .captionText()
