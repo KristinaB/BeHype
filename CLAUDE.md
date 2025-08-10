@@ -93,6 +93,7 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - **CRITICAL: Always use rake tasks for building - NEVER run cargo or xcodebuild directly**
 - **NEVER use `cargo build`, `cargo run`, or `xcodebuild` commands directly**
 - **ALWAYS use the provided rake tasks for all build operations**
+- **ALWAYS build for iPhone 16 simulator when testing or running xcodebuild commands**
 - Rust changes: `rake build_full_rust` then manual Xcode build
 - iOS changes: `rake build` 
 - SwiftUI screens integrate with existing HyperliquidService
@@ -123,6 +124,9 @@ When debugging iOS apps with missing resources or initialization issues:
 - **Test Commands**: `rake test_ui` for all UI tests, `rake test_ui_flow` for main flow only
 - **Screen Coverage**: Home, Trade, Transactions tabs + Chart modal functionality
 - **Automated Validation**: Verifies UI elements load correctly without functional testing
+- **Mock System**: UI tests use mock responses for order placement to avoid real trades
+- **Real Data**: Read-only operations (balances, prices) use real SDK calls for authentic testing
+- **iPhone 16 Simulator**: All testing should be done on iPhone 16 simulator
 - **IMPORTANT**: Never run test commands directly - always ask the user to run them and provide the output for analysis
 
 ### Claude Code Configuration:

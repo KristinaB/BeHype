@@ -357,6 +357,23 @@ class HyperliquidService: ObservableObject {
         print("📋 [DEBUG] Placing \(orderType == .buy ? "BUY" : "SELL") limit order...")
         print("📋 [DEBUG] Amount: \(amount) \(orderType == .buy ? "USDC" : "BTC"), Price: $\(limitPrice)")
         
+        // Check if running in UI test mock mode
+        if MockManager.shared.isUITestMockMode {
+            print("🧪 [UI TEST] Using mock order placement")
+            let mockResult = MockManager.shared.mockOrderPlacement(
+                orderType: orderType,
+                amount: amount, 
+                price: limitPrice
+            )
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.status = mockResult.success ? "✅ Mock order placed" : "❌ Mock order failed"
+                self.lastSwapResult = mockResult.message
+                completion(mockResult)
+            }
+            return
+        }
+        
         guard let walletClient = walletClient else {
             completion(SwapResult(success: false, message: "❌ Wallet not loaded", orderId: nil, filledSize: nil, avgPrice: nil))
             return
@@ -512,6 +529,18 @@ class HyperliquidService: ObservableObject {
     
     func fetchUserFills(daysBack: Int = 30) {
         print("📋 [DEBUG] Starting fetchUserFills...")
+        
+        // Check if running in UI test mock mode
+        if MockManager.shared.isUITestMockMode {
+            print("🧪 [UI TEST] Using mock user fills data")
+            let mockFills = MockManager.shared.generateMockTransactions()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.userFills = mockFills
+                self.status = "✅ Found \(mockFills.count) mock fills"
+            }
+            return
+        }
         
         guard !walletAddress.isEmpty else {
             print("❌ [DEBUG] Wallet address is empty")
