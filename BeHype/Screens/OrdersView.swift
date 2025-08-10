@@ -94,7 +94,8 @@ struct OrdersView: View {
           }
         }
       }
-      .padding(.vertical)
+      .padding(.top)
+      .padding(.bottom, 100) // Extra bottom padding to ensure last item is visible above tab bar
     }
   }
 
