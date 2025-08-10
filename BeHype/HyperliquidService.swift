@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import Combine
 
 // MARK: - Order Type Enum
 
@@ -25,6 +26,8 @@ class HyperliquidService: ObservableObject {
   @Published var marketDataService: MarketDataService
   @Published var tradingService: TradingService
   @Published var transactionService: TransactionService
+  
+  private var cancellables = Set<AnyCancellable>()
 
   // Computed properties for backward compatibility
   var status: String {
@@ -69,6 +72,35 @@ class HyperliquidService: ObservableObject {
     self.marketDataService = MarketDataService()
     self.tradingService = TradingService(walletService: wallet)
     self.transactionService = TransactionService(walletService: wallet)
+    
+    // Forward objectWillChange notifications from all services
+    setupChangeForwarding()
+  }
+  
+  private func setupChangeForwarding() {
+    walletService.objectWillChange
+      .sink { [weak self] _ in
+        self?.objectWillChange.send()
+      }
+      .store(in: &cancellables)
+    
+    marketDataService.objectWillChange
+      .sink { [weak self] _ in
+        self?.objectWillChange.send()
+      }
+      .store(in: &cancellables)
+    
+    tradingService.objectWillChange
+      .sink { [weak self] _ in
+        self?.objectWillChange.send()
+      }
+      .store(in: &cancellables)
+    
+    transactionService.objectWillChange
+      .sink { [weak self] _ in
+        self?.objectWillChange.send()
+      }
+      .store(in: &cancellables)
   }
 
   func loadPrivateKey() {
