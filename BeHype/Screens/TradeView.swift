@@ -119,52 +119,63 @@ struct TradeView: View {
                 Text("Order Type")
                     .inputLabel()
                 
-                HStack(spacing: 0) {
+                HStack(spacing: 8) {
                     Button(action: { orderType = .buy }) {
                         Text("BUY")
                             .smallButtonText()
-                            .foregroundColor(orderType == .buy ? .white : .secondaryText)
+                            .foregroundColor(orderType == .buy ? .bullishGreen : .secondaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(
-                                orderType == .buy
-                                    ? LinearGradient(
-                                        colors: [.bullishGreen, .bullishGreen.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                            .background(Color.inputBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .strokeBorder(
+                                        orderType == .buy
+                                            ? LinearGradient(
+                                                colors: [.bullishGreen, .bullishGreen.opacity(0.6)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                            : LinearGradient(
+                                                colors: [Color.borderGray.opacity(0.3)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            ),
+                                        lineWidth: orderType == .buy ? 2 : 1
                                     )
-                                    : LinearGradient(colors: [.clear], startPoint: .leading, endPoint: .trailing)
                             )
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(PlainButtonStyle())
                     
                     Button(action: { orderType = .sell }) {
                         Text("SELL")
                             .smallButtonText()
-                            .foregroundColor(orderType == .sell ? .white : .secondaryText)
+                            .foregroundColor(orderType == .sell ? .bearishRed : .secondaryText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(
-                                orderType == .sell
-                                    ? LinearGradient(
-                                        colors: [.bearishRed, .bearishRed.opacity(0.8)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
+                            .background(Color.inputBackground)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .strokeBorder(
+                                        orderType == .sell
+                                            ? LinearGradient(
+                                                colors: [.bearishRed, .bearishRed.opacity(0.6)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                            : LinearGradient(
+                                                colors: [Color.borderGray.opacity(0.3)],
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            ),
+                                        lineWidth: orderType == .sell ? 2 : 1
                                     )
-                                    : LinearGradient(colors: [.clear], startPoint: .leading, endPoint: .trailing)
                             )
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.inputBackground)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(Color.borderGray.opacity(0.3), lineWidth: 1)
-                        )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
         }
     }
