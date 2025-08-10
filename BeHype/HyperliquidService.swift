@@ -6,6 +6,7 @@ class HyperliquidService: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var exchangeAssets: Int = 0
     @Published var usdcBalance: String = "0.0"
+    @Published var btcBalance: String = "0.0"
     @Published var btcPrice: String = "0.0"
     @Published var lastSwapResult: String = ""
     @Published var userFills: [UserFill] = []
@@ -124,13 +125,21 @@ class HyperliquidService: ObservableObject {
             let balances = walletClient.getTokenBalances(address: self.walletAddress)
             
             DispatchQueue.main.async {
+                // Update USDC balance
                 if let usdcBalance = balances.first(where: { $0.coin == "USDC" }) {
                     self.usdcBalance = usdcBalance.total
-                    self.status = "💵 USDC Balance: \(usdcBalance.total)"
                 } else {
                     self.usdcBalance = "0.0"
-                    self.status = "❌ No USDC balance found"
                 }
+                
+                // Update BTC balance
+                if let btcBalance = balances.first(where: { $0.coin == "BTC" }) {
+                    self.btcBalance = btcBalance.total
+                } else {
+                    self.btcBalance = "0.0"
+                }
+                
+                self.status = "💵 USDC: \(self.usdcBalance) | ₿ BTC: \(self.btcBalance)"
                 self.isLoading = false
             }
         }

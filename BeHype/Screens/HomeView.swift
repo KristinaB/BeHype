@@ -132,11 +132,19 @@ struct HomeView: View {
         change: nil,
         isPositive: nil
       )
+      
+      PortfolioCard(
+        title: "BTC Balance",
+        balance: hyperliquidService.btcBalance,
+        value: "$\(calculateBtcValue())",
+        change: nil,
+        isPositive: nil
+      )
 
       PortfolioCard(
         title: "Total Portfolio Value",
         balance: "$\(calculateTotalValue())",
-        value: "≈ \(hyperliquidService.usdcBalance) USDC",
+        value: "USDC + BTC",
         change: nil,
         isPositive: nil
       )
@@ -270,7 +278,18 @@ struct HomeView: View {
 
   private func calculateTotalValue() -> String {
     let usdcValue = Double(hyperliquidService.usdcBalance) ?? 0
-    return String(format: "%.2f", usdcValue)
+    let btcAmount = Double(hyperliquidService.btcBalance) ?? 0
+    let btcPrice = Double(hyperliquidService.btcPrice) ?? 0
+    let btcValue = btcAmount * btcPrice
+    let total = usdcValue + btcValue
+    return String(format: "%.2f", total)
+  }
+  
+  private func calculateBtcValue() -> String {
+    let btcAmount = Double(hyperliquidService.btcBalance) ?? 0
+    let btcPrice = Double(hyperliquidService.btcPrice) ?? 0
+    let btcValue = btcAmount * btcPrice
+    return String(format: "%.2f", btcValue)
   }
 }
 
