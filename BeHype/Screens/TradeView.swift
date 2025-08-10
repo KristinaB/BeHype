@@ -269,8 +269,9 @@ struct TradeView: View {
 
   private var placeOrderButton: some View {
     VStack(spacing: 12) {
-      PrimaryButton(
+      OutlineButton(
         "\(orderType.displayText.uppercased()) \(pair)",
+        size: .large,
         isLoading: isPlacingOrder,
         isDisabled: !isValidOrder() || isPlacingOrder
       ) {
@@ -558,7 +559,7 @@ struct OrderSuccessView: View {
           }
           
           VStack(spacing: 12) {
-            PrimaryButton("View Orders") {
+            OutlineButton("View Orders", size: .large) {
               onDone()
               dismiss()
               // Post notification to switch to orders tab
