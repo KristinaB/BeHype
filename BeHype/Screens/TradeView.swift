@@ -125,7 +125,7 @@ struct TradeView: View {
           }
         }
 
-        HStack {
+        VStack(spacing: 8) {
           InfoRow(title: "24h High", value: "$\(getHighPrice())")
           InfoRow(title: "24h Low", value: "$\(getLowPrice())")
         }
