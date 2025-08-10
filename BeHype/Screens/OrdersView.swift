@@ -127,7 +127,11 @@ struct OrdersView: View {
 
           if selectedFilter == .all {
             SmallButton("Start Trading", icon: "plus.circle") {
-              // Switch to trade tab (would need tab binding)
+              // Post notification to switch to trade tab
+              NotificationCenter.default.post(
+                name: NSNotification.Name("SwitchToTradeTab"),
+                object: nil
+              )
             }
           }
         }

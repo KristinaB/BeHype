@@ -143,7 +143,7 @@ struct TradeView: View {
           Button(action: { orderType = .buy }) {
             Text("BUY")
               .smallButtonText()
-              .foregroundColor(orderType == .buy ? .bullishGreen : .secondaryText)
+              .foregroundColor(orderType == .buy ? Color(red: 0.2, green: 0.7, blue: 0.5) : .secondaryText)
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
               .background(Color.inputBackground)
@@ -152,7 +152,10 @@ struct TradeView: View {
                   .strokeBorder(
                     orderType == .buy
                       ? LinearGradient(
-                        colors: [.bullishGreen, .bullishGreen.opacity(0.6)],
+                        colors: [
+                          Color(red: 0.1, green: 0.5, blue: 0.7),  // Blue-teal
+                          Color(red: 0.2, green: 0.7, blue: 0.5),  // Teal-green
+                        ],
                         startPoint: .leading,
                         endPoint: .trailing
                       )
@@ -171,7 +174,7 @@ struct TradeView: View {
           Button(action: { orderType = .sell }) {
             Text("SELL")
               .smallButtonText()
-              .foregroundColor(orderType == .sell ? .bearishRed : .secondaryText)
+              .foregroundColor(orderType == .sell ? Color(red: 0.7, green: 0.2, blue: 0.2) : .secondaryText)
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
               .background(Color.inputBackground)
@@ -180,7 +183,10 @@ struct TradeView: View {
                   .strokeBorder(
                     orderType == .sell
                       ? LinearGradient(
-                        colors: [.bearishRed, .bearishRed.opacity(0.6)],
+                        colors: [
+                          Color(red: 0.7, green: 0.2, blue: 0.2),  // Darker red
+                          Color(red: 0.5, green: 0.15, blue: 0.15).opacity(0.7),  // Even darker red
+                        ],
                         startPoint: .leading,
                         endPoint: .trailing
                       )
