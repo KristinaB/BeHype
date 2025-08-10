@@ -37,7 +37,8 @@ class Build
   def self.swift_bindings
     puts "Generating Swift bindings..."
     Dir.chdir(RUST_DIR) do
-      system("cargo swift package --platforms ios macos")
+      # Use non-interactive mode with accept-all flag
+      system("cargo swift package --platforms ios macos --name HyperliquidSdkSwift --accept-all")
     end
   end
 
@@ -49,9 +50,6 @@ class Build
     
     # Copy Swift bindings
     system("cp -r #{RUST_DIR}/HyperliquidSdkSwift/Sources/HyperliquidSdkSwift/* BeHype/HyperliquidSDK/")
-    
-    # Copy main SDK wrapper
-    system("cp source_project/Sources/HyperliquidSwiftSDK/HyperliquidSwiftSDK.swift BeHype/HyperliquidSDK/")
     
     puts "✅ iOS SDK files updated"
   end

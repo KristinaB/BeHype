@@ -501,6 +501,8 @@ public protocol HyperliquidClientProtocol: AnyObject, Sendable {
     
     func getAllMids()  -> [PriceInfo]
     
+    func getBtcPrice()  -> String
+    
     func getCandlesSnapshot(coin: String, interval: String, startTime: UInt64, endTime: UInt64)  -> [CandleData]
     
     func getExchangeMeta()  -> ExchangeMeta
@@ -510,6 +512,14 @@ public protocol HyperliquidClientProtocol: AnyObject, Sendable {
     func getSpotMeta()  -> [String]
     
     func getTokenBalances(address: String)  -> [TokenBalance]
+    
+    func getUserFillsByTime(address: String, startTime: UInt64, endTime: UInt64?)  -> [UserFill]
+    
+    func placeBtcBuyOrder(usdcAmount: String, limitPrice: String)  -> SwapResult
+    
+    func placeBtcSellOrder(btcAmount: String, limitPrice: String)  -> SwapResult
+    
+    func placeLimitOrder(asset: String, isBuy: Bool, size: String, price: String, timeInForce: String)  -> SwapResult
     
     func swapUsdcToBtc(usdcAmount: String)  -> SwapResult
     
@@ -588,6 +598,13 @@ open func getAllMids() -> [PriceInfo]  {
 })
 }
     
+open func getBtcPrice() -> String  {
+    return try!  FfiConverterString.lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_btc_price(self.uniffiClonePointer(),$0
+    )
+})
+}
+    
 open func getCandlesSnapshot(coin: String, interval: String, startTime: UInt64, endTime: UInt64) -> [CandleData]  {
     return try!  FfiConverterSequenceTypeCandleData.lift(try! rustCall() {
     uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_candles_snapshot(self.uniffiClonePointer(),
@@ -625,6 +642,46 @@ open func getTokenBalances(address: String) -> [TokenBalance]  {
     return try!  FfiConverterSequenceTypeTokenBalance.lift(try! rustCall() {
     uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_token_balances(self.uniffiClonePointer(),
         FfiConverterString.lower(address),$0
+    )
+})
+}
+    
+open func getUserFillsByTime(address: String, startTime: UInt64, endTime: UInt64?) -> [UserFill]  {
+    return try!  FfiConverterSequenceTypeUserFill.lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_get_user_fills_by_time(self.uniffiClonePointer(),
+        FfiConverterString.lower(address),
+        FfiConverterUInt64.lower(startTime),
+        FfiConverterOptionUInt64.lower(endTime),$0
+    )
+})
+}
+    
+open func placeBtcBuyOrder(usdcAmount: String, limitPrice: String) -> SwapResult  {
+    return try!  FfiConverterTypeSwapResult_lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_place_btc_buy_order(self.uniffiClonePointer(),
+        FfiConverterString.lower(usdcAmount),
+        FfiConverterString.lower(limitPrice),$0
+    )
+})
+}
+    
+open func placeBtcSellOrder(btcAmount: String, limitPrice: String) -> SwapResult  {
+    return try!  FfiConverterTypeSwapResult_lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_place_btc_sell_order(self.uniffiClonePointer(),
+        FfiConverterString.lower(btcAmount),
+        FfiConverterString.lower(limitPrice),$0
+    )
+})
+}
+    
+open func placeLimitOrder(asset: String, isBuy: Bool, size: String, price: String, timeInForce: String) -> SwapResult  {
+    return try!  FfiConverterTypeSwapResult_lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_place_limit_order(self.uniffiClonePointer(),
+        FfiConverterString.lower(asset),
+        FfiConverterBool.lower(isBuy),
+        FfiConverterString.lower(size),
+        FfiConverterString.lower(price),
+        FfiConverterString.lower(timeInForce),$0
     )
 })
 }
@@ -1348,6 +1405,172 @@ public func FfiConverterTypeTokenBalance_lower(_ value: TokenBalance) -> RustBuf
     return FfiConverterTypeTokenBalance.lower(value)
 }
 
+
+public struct UserFill {
+    public var coin: String
+    public var px: String
+    public var sz: String
+    public var side: String
+    public var time: UInt64
+    public var startPosition: String
+    public var dir: String
+    public var closedPnl: String
+    public var hash: String
+    public var oid: UInt64
+    public var crossed: Bool
+    public var fee: String?
+    public var tid: UInt64?
+    public var feeToken: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(coin: String, px: String, sz: String, side: String, time: UInt64, startPosition: String, dir: String, closedPnl: String, hash: String, oid: UInt64, crossed: Bool, fee: String?, tid: UInt64?, feeToken: String?) {
+        self.coin = coin
+        self.px = px
+        self.sz = sz
+        self.side = side
+        self.time = time
+        self.startPosition = startPosition
+        self.dir = dir
+        self.closedPnl = closedPnl
+        self.hash = hash
+        self.oid = oid
+        self.crossed = crossed
+        self.fee = fee
+        self.tid = tid
+        self.feeToken = feeToken
+    }
+}
+
+#if compiler(>=6)
+extension UserFill: Sendable {}
+#endif
+
+
+extension UserFill: Equatable, Hashable {
+    public static func ==(lhs: UserFill, rhs: UserFill) -> Bool {
+        if lhs.coin != rhs.coin {
+            return false
+        }
+        if lhs.px != rhs.px {
+            return false
+        }
+        if lhs.sz != rhs.sz {
+            return false
+        }
+        if lhs.side != rhs.side {
+            return false
+        }
+        if lhs.time != rhs.time {
+            return false
+        }
+        if lhs.startPosition != rhs.startPosition {
+            return false
+        }
+        if lhs.dir != rhs.dir {
+            return false
+        }
+        if lhs.closedPnl != rhs.closedPnl {
+            return false
+        }
+        if lhs.hash != rhs.hash {
+            return false
+        }
+        if lhs.oid != rhs.oid {
+            return false
+        }
+        if lhs.crossed != rhs.crossed {
+            return false
+        }
+        if lhs.fee != rhs.fee {
+            return false
+        }
+        if lhs.tid != rhs.tid {
+            return false
+        }
+        if lhs.feeToken != rhs.feeToken {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(coin)
+        hasher.combine(px)
+        hasher.combine(sz)
+        hasher.combine(side)
+        hasher.combine(time)
+        hasher.combine(startPosition)
+        hasher.combine(dir)
+        hasher.combine(closedPnl)
+        hasher.combine(hash)
+        hasher.combine(oid)
+        hasher.combine(crossed)
+        hasher.combine(fee)
+        hasher.combine(tid)
+        hasher.combine(feeToken)
+    }
+}
+
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeUserFill: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UserFill {
+        return
+            try UserFill(
+                coin: FfiConverterString.read(from: &buf), 
+                px: FfiConverterString.read(from: &buf), 
+                sz: FfiConverterString.read(from: &buf), 
+                side: FfiConverterString.read(from: &buf), 
+                time: FfiConverterUInt64.read(from: &buf), 
+                startPosition: FfiConverterString.read(from: &buf), 
+                dir: FfiConverterString.read(from: &buf), 
+                closedPnl: FfiConverterString.read(from: &buf), 
+                hash: FfiConverterString.read(from: &buf), 
+                oid: FfiConverterUInt64.read(from: &buf), 
+                crossed: FfiConverterBool.read(from: &buf), 
+                fee: FfiConverterOptionString.read(from: &buf), 
+                tid: FfiConverterOptionUInt64.read(from: &buf), 
+                feeToken: FfiConverterOptionString.read(from: &buf)
+        )
+    }
+
+    public static func write(_ value: UserFill, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.coin, into: &buf)
+        FfiConverterString.write(value.px, into: &buf)
+        FfiConverterString.write(value.sz, into: &buf)
+        FfiConverterString.write(value.side, into: &buf)
+        FfiConverterUInt64.write(value.time, into: &buf)
+        FfiConverterString.write(value.startPosition, into: &buf)
+        FfiConverterString.write(value.dir, into: &buf)
+        FfiConverterString.write(value.closedPnl, into: &buf)
+        FfiConverterString.write(value.hash, into: &buf)
+        FfiConverterUInt64.write(value.oid, into: &buf)
+        FfiConverterBool.write(value.crossed, into: &buf)
+        FfiConverterOptionString.write(value.fee, into: &buf)
+        FfiConverterOptionUInt64.write(value.tid, into: &buf)
+        FfiConverterOptionString.write(value.feeToken, into: &buf)
+    }
+}
+
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeUserFill_lift(_ buf: RustBuffer) throws -> UserFill {
+    return try FfiConverterTypeUserFill.lift(buf)
+}
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+public func FfiConverterTypeUserFill_lower(_ value: UserFill) -> RustBuffer {
+    return FfiConverterTypeUserFill.lower(value)
+}
+
 #if swift(>=5.8)
 @_documentation(visibility: private)
 #endif
@@ -1545,6 +1768,31 @@ fileprivate struct FfiConverterSequenceTypeTokenBalance: FfiConverterRustBuffer 
         return seq
     }
 }
+
+#if swift(>=5.8)
+@_documentation(visibility: private)
+#endif
+fileprivate struct FfiConverterSequenceTypeUserFill: FfiConverterRustBuffer {
+    typealias SwiftType = [UserFill]
+
+    public static func write(_ value: [UserFill], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeUserFill.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [UserFill] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [UserFill]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            seq.append(try FfiConverterTypeUserFill.read(from: &buf))
+        }
+        return seq
+    }
+}
 public func deriveAddressFromPrivateKey(privateKey: String) -> String  {
     return try!  FfiConverterString.lift(try! rustCall() {
     uniffi_hyperliquid_sdk_swift_fn_func_derive_address_from_private_key(
@@ -1583,6 +1831,9 @@ private let initializationResult: InitializationResult = {
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_all_mids() != 11924) {
         return InitializationResult.apiChecksumMismatch
     }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_btc_price() != 26679) {
+        return InitializationResult.apiChecksumMismatch
+    }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_candles_snapshot() != 12626) {
         return InitializationResult.apiChecksumMismatch
     }
@@ -1596,6 +1847,18 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_token_balances() != 6206) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_user_fills_by_time() != 60522) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_place_btc_buy_order() != 44925) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_place_btc_sell_order() != 31605) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_place_limit_order() != 57640) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_swap_usdc_to_btc() != 61875) {

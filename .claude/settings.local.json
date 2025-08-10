@@ -27,7 +27,8 @@
       "Bash(./target/debug/test_allmids)",
       "Bash(CARGO_NET_GIT_FETCH_WITH_CLI=true rake build_rust)",
       "Bash(cargo clean:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(cargo swift package:*)"
     ],
     "deny": []
   }
