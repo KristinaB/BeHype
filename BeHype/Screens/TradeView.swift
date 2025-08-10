@@ -278,7 +278,7 @@ struct TradeView: View {
         if orderType == .buy {
             return hyperliquidService.usdcBalance + " USDC"
         } else {
-            return "0.0 BTC" // We don't track BTC balance in the demo
+            return hyperliquidService.btcBalance + " BTC"
         }
     }
     
@@ -286,7 +286,7 @@ struct TradeView: View {
         if orderType == .buy {
             amount = hyperliquidService.usdcBalance
         } else {
-            amount = "0.0" // No BTC balance in demo
+            amount = hyperliquidService.btcBalance
         }
     }
     
@@ -329,7 +329,8 @@ struct TradeView: View {
             let balance = Double(hyperliquidService.usdcBalance) ?? 0
             return amountValue <= balance
         } else {
-            return true // No BTC balance check in demo
+            let btcBalance = Double(hyperliquidService.btcBalance) ?? 0
+            return amountValue <= btcBalance
         }
     }
 }
