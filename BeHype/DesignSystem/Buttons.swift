@@ -256,10 +256,10 @@ struct OutlineButton: View {
   let isLoading: Bool
   let isDisabled: Bool
   let action: () -> Void
-  
+
   enum ButtonSize {
     case small, medium, large
-    
+
     var padding: EdgeInsets {
       switch self {
       case .small:
@@ -270,7 +270,7 @@ struct OutlineButton: View {
         return EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20)
       }
     }
-    
+
     var fontSize: Font {
       switch self {
       case .small:
@@ -282,7 +282,7 @@ struct OutlineButton: View {
       }
     }
   }
-  
+
   init(
     _ title: String,
     icon: String? = nil,
@@ -298,7 +298,7 @@ struct OutlineButton: View {
     self.isDisabled = isDisabled
     self.action = action
   }
-  
+
   var body: some View {
     Button(action: action) {
       HStack(spacing: 8) {
@@ -327,13 +327,13 @@ struct OutlineButton: View {
                 colors: [
                   Color.white.opacity(0.15),
                   Color.white.opacity(0.08),
-                  Color.white.opacity(0.05)
+                  Color.white.opacity(0.05),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
               )
             )
-          
+
           // Blue-green glow overlay
           Capsule()
             .fill(
@@ -342,20 +342,20 @@ struct OutlineButton: View {
                   Color.blue.opacity(0.1),
                   Color.cyan.opacity(0.08),
                   Color.green.opacity(0.05),
-                  Color.clear
+                  Color.clear,
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
               )
             )
-          
+
           // BeHype gradient outline
           Capsule()
             .strokeBorder(
               LinearGradient.beHypeBrand.opacity(0.8),
               lineWidth: 2
             )
-          
+
           // Glass highlight on top edge
           Capsule()
             .strokeBorder(
@@ -363,7 +363,7 @@ struct OutlineButton: View {
                 colors: [
                   Color.white.opacity(0.4),
                   Color.white.opacity(0.2),
-                  Color.clear
+                  Color.clear,
                 ],
                 startPoint: .top,
                 endPoint: .bottom

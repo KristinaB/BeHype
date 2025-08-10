@@ -174,7 +174,7 @@ struct MarketCardWithChart: View {
   let change: String
   let isPositive: Bool
   let onChartTap: () -> Void
-  
+
   var body: some View {
     AppCard {
       VStack(spacing: 16) {
@@ -206,7 +206,7 @@ struct MarketCardWithChart: View {
             }
           }
         }
-        
+
         HStack {
           Spacer()
           SmallButton("View Chart", icon: "chart.line.uptrend.xyaxis") {

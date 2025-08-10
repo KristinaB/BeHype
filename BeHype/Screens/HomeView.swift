@@ -106,7 +106,7 @@ struct HomeView: View {
         Text("Hyperliquid Trading")
           .secondaryText()
       }
-      
+
       // Fund Wallet Button
       HStack {
         Spacer()
@@ -132,7 +132,7 @@ struct HomeView: View {
         change: nil,
         isPositive: nil
       )
-      
+
       PortfolioCard(
         title: "BTC Balance",
         balance: hyperliquidService.btcBalance,
@@ -284,7 +284,7 @@ struct HomeView: View {
     let total = usdcValue + btcValue
     return String(format: "%.2f", total)
   }
-  
+
   private func calculateBtcValue() -> String {
     let btcAmount = Double(hyperliquidService.btcBalance) ?? 0
     let btcPrice = Double(hyperliquidService.btcPrice) ?? 0
