@@ -17,7 +17,11 @@
       "Bash(xcrun simctl boot:*)",
       "Bash(xcrun simctl shutdown:*)",
       "Bash(timeout:*)",
-      "Bash(xcrun simctl install:*)"
+      "Bash(xcrun simctl install:*)",
+      "Bash(cargo build:*)",
+      "Bash(./target/release/test_fills_simple)",
+      "Bash(uniffi-bindgen-rs generate:*)",
+      "Bash(./target/release/test_balance)"
     ],
     "deny": []
   }
