@@ -2,6 +2,7 @@
 // https://docs.swift.org/swift-book
 
 import Foundation
+// Framework is linked as static library, functions available directly
 
 public class HyperliquidSwiftSDK {
     

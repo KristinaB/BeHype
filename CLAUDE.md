@@ -98,6 +98,16 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - SwiftUI screens integrate with existing HyperliquidService
 - All trading functionality works with real Hyperliquid mainnet
 
+### Trading Features:
+- **Limit Orders**: Full buy/sell limit order functionality implemented
+  - HyperliquidService has `placeLimitOrder()`, `placeBuyOrder()`, `placeSellOrder()` methods
+  - TradeView supports both BTC/USDC buy and sell operations with limit prices
+  - Smart execution: Real trading for $11 USDC orders, simulation for other amounts
+  - Proper precision: 5 decimals for BTC, 2 decimals for USDC pairs
+- **Order Types**: Buy/Sell with professional UI and validation
+- **BTC Price**: Direct API fetching implemented to work around getAllMids sampling issue
+- **Transaction History**: Fetches and displays user fills with filtering
+
 ### iOS Debugging Procedure:
 When debugging iOS apps with missing resources or initialization issues:
 1. Add comprehensive print() statements with emojis for visual clarity
