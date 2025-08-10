@@ -95,7 +95,7 @@ struct OrdersView: View {
         }
       }
       .padding(.top, 16)
-      .padding(.bottom, 120) // Ensure last item is visible above tab bar
+      .padding(.bottom, 150) // Extra bottom padding to ensure last item is fully visible above tab bar
       .padding(.horizontal, 0) // Remove any horizontal padding from scroll content
     }
   }
@@ -342,36 +342,42 @@ struct FillRow: View {
               .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
           }
 
-          HStack {
-            VStack(alignment: .leading, spacing: 4) {
-              Text("Size")
-                .captionText()
+          VStack(spacing: 8) {
+            // Size and Price on same line
+            HStack {
+              VStack(alignment: .leading, spacing: 4) {
+                Text("Size")
+                  .captionText()
 
-              Text("\(fill.sz) \(fill.isBuy ? "USDC" : "BTC")")
-                .secondaryText()
-                .fontWeight(.medium)
+                Text("\(fill.sz) \(fill.isBuy ? "USDC" : "BTC")")
+                  .secondaryText()
+                  .fontWeight(.medium)
+              }
+
+              Spacer()
+
+              VStack(alignment: .trailing, spacing: 4) {
+                Text("Price")
+                  .captionText()
+
+                Text(fill.displayPrice)
+                  .secondaryText()
+                  .fontWeight(.medium)
+              }
             }
+            
+            // Value on separate line
+            HStack {
+              VStack(alignment: .leading, spacing: 4) {
+                Text("Value")
+                  .captionText()
 
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-              Text("Price")
-                .captionText()
-
-              Text(fill.displayPrice)
-                .secondaryText()
-                .fontWeight(.medium)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 4) {
-              Text("Value")
-                .captionText()
-
-              Text(formatFillValue())
-                .priceText()
-                .font(.subheadline)
+                Text(formatFillValue())
+                  .priceText()
+                  .font(.subheadline)
+              }
+              
+              Spacer()
             }
           }
 
