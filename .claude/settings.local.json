@@ -21,7 +21,13 @@
       "Bash(cargo build:*)",
       "Bash(./target/release/test_fills_simple)",
       "Bash(uniffi-bindgen-rs generate:*)",
-      "Bash(./target/release/test_balance)"
+      "Bash(./target/release/test_balance)",
+      "Bash(./target/release/get_btc_price)",
+      "Bash(swift:*)",
+      "Bash(./target/debug/test_allmids)",
+      "Bash(CARGO_NET_GIT_FETCH_WITH_CLI=true rake build_rust)",
+      "Bash(cargo clean:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }
