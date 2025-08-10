@@ -14,6 +14,9 @@ struct TradeView: View {
   @State private var limitPrice = ""
   @State private var showingOrderConfirmation = false
   @State private var showingChart = false
+  @State private var isPlacingOrder = false
+  @State private var showingOrderSuccess = false
+  @State private var orderResult: SwapResult?
 
   private let pair = "BTC/USDC"
 
@@ -65,6 +68,16 @@ struct TradeView: View {
           limitPrice: limitPrice,
           estimatedValue: calculateEstimatedValue(),
           hyperliquidService: hyperliquidService
+        )
+      }
+      .sheet(isPresented: $showingOrderSuccess) {
+        OrderSuccessView(
+          orderResult: orderResult,
+          onDone: {
+            showingOrderSuccess = false
+            // Navigate to transactions tab
+            // This will be handled by the parent view
+          }
         )
       }
     }
@@ -251,23 +264,43 @@ struct TradeView: View {
     VStack(spacing: 12) {
       PrimaryButton(
         "\(orderType.displayText.uppercased()) \(pair)",
-        isLoading: hyperliquidService.isLoading,
-        isDisabled: !isValidOrder()
+        isLoading: isPlacingOrder,
+        isDisabled: !isValidOrder() || isPlacingOrder
       ) {
-        // Use new limit order functionality
-        hyperliquidService.placeLimitOrder(
-          orderType: orderType,
-          amount: amount,
-          limitPrice: limitPrice
-        ) { result in
-          // Handle result (optional - already handled in service)
-          print("📋 [TradeView] Order result: \(result.success ? "Success" : "Failed")")
-        }
+        placeOrder()
       }
 
       Text("⚠️ Trading with real funds on mainnet")
         .captionText()
         .foregroundColor(.warningOrange)
+    }
+  }
+  
+  private func placeOrder() {
+    isPlacingOrder = true
+    
+    // Use new limit order functionality
+    hyperliquidService.placeLimitOrder(
+      orderType: orderType,
+      amount: amount,
+      limitPrice: limitPrice
+    ) { result in
+      DispatchQueue.main.async {
+        self.isPlacingOrder = false
+        self.orderResult = result
+        
+        if result.success {
+          // Show success modal
+          self.showingOrderSuccess = true
+          
+          // Clear the form
+          self.amount = ""
+          self.limitPrice = hyperliquidService.btcPrice
+        } else {
+          // Could show error modal here too, for now just let the status show
+          print("📋 [TradeView] Order failed: \(result.message)")
+        }
+      }
     }
   }
 
@@ -411,6 +444,106 @@ struct OrderConfirmationView: View {
         .padding()
       }
       .navigationTitle("Confirm")
+      .navigationBarTitleDisplayMode(.inline)
+    }
+  }
+}
+
+// MARK: - Order Success View
+
+struct OrderSuccessView: View {
+  let orderResult: SwapResult?
+  let onDone: () -> Void
+  @Environment(\.dismiss) private var dismiss
+  
+  var body: some View {
+    NavigationView {
+      ZStack {
+        Color.appBackground
+          .ignoresSafeArea()
+        
+        VStack(spacing: 32) {
+          // Success Icon
+          ZStack {
+            Circle()
+              .fill(
+                LinearGradient(
+                  colors: [
+                    Color.bullishGreen.opacity(0.2),
+                    Color.bullishGreen.opacity(0.1),
+                  ],
+                  startPoint: .top,
+                  endPoint: .bottom
+                )
+              )
+              .frame(width: 100, height: 100)
+            
+            Image(systemName: "checkmark.circle.fill")
+              .font(.system(size: 50, weight: .medium))
+              .foregroundStyle(LinearGradient(
+                colors: [.bullishGreen, .green],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+              ))
+          }
+          
+          VStack(spacing: 16) {
+            Text("Order Placed Successfully!")
+              .brandText()
+              .multilineTextAlignment(.center)
+            
+            if let result = orderResult {
+              AppCard {
+                VStack(spacing: 12) {
+                  Text("Order Details")
+                    .cardTitle()
+                  
+                  VStack(spacing: 8) {
+                    if let orderId = result.orderId {
+                      InfoRow(title: "Order ID", value: String(orderId))
+                    }
+                    
+                    if let filledSize = result.filledSize, !filledSize.isEmpty {
+                      InfoRow(title: "Filled Size", value: "\(filledSize) BTC")
+                      InfoRow(title: "Status", value: "✅ Filled", color: .bullishGreen)
+                      
+                      if let avgPrice = result.avgPrice {
+                        InfoRow(title: "Average Price", value: "$\(avgPrice)")
+                      }
+                    } else {
+                      InfoRow(title: "Status", value: "✅ Placed", color: .primaryGradientStart)
+                      Text("Order is pending and will be filled when price conditions are met")
+                        .captionText()
+                        .foregroundColor(.tertiaryText)
+                        .multilineTextAlignment(.center)
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          VStack(spacing: 12) {
+            PrimaryButton("View Transactions") {
+              onDone()
+              dismiss()
+              // Post notification to switch to transactions tab
+              NotificationCenter.default.post(
+                name: NSNotification.Name("SwitchToTransactionsTab"),
+                object: nil
+              )
+            }
+            
+            SecondaryButton("Close") {
+              dismiss()
+            }
+          }
+          
+          Spacer()
+        }
+        .padding()
+      }
+      .navigationTitle("Order Complete")
       .navigationBarTitleDisplayMode(.inline)
     }
   }

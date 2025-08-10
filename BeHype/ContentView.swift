@@ -42,6 +42,9 @@ struct ContentView: View {
       .accentColor(.primaryGradientStart)
     }
     .preferredColorScheme(.dark)
+    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToTransactionsTab"))) { _ in
+      selectedTab = 2
+    }
   }
 }
 
