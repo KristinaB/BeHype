@@ -56,13 +56,52 @@ impl HyperliquidClient {
             info.all_mids().await.expect("Failed to get mids")
         });
         
-        all_mids.iter()
-            .take(10)
-            .map(|(coin, price)| PriceInfo {
-                coin: coin.clone(),
-                price: price.clone(),
-            })
-            .collect()
+        // Return more results and ensure BTC variants are included
+        let mut result_mids = Vec::new();
+        let btc_variants = ["@142", "BTC", "UBTC", "BTC/USDC", "UBTC/USDC"];
+        
+        // First, add BTC variants if found
+        for variant in &btc_variants {
+            if let Some(price) = all_mids.get(*variant) {
+                result_mids.push(PriceInfo {
+                    coin: variant.to_string(),
+                    price: price.clone(),
+                });
+            }
+        }
+        
+        // Then add other popular coins
+        let mut count = 0;
+        for (coin, price) in all_mids.iter() {
+            if count >= 15 { break; }
+            if !btc_variants.contains(&coin.as_str()) {
+                result_mids.push(PriceInfo {
+                    coin: coin.clone(),
+                    price: price.clone(),
+                });
+                count += 1;
+            }
+        }
+        
+        result_mids
+    }
+    
+    pub fn get_btc_price(&self) -> String {
+        let info = self.info.clone();
+        let all_mids = self.runtime.block_on(async move {
+            info.all_mids().await.expect("Failed to get mids")
+        });
+        
+        // Try different BTC variants in priority order
+        let btc_variants = ["@142", "BTC", "UBTC", "BTC/USDC", "UBTC/USDC"];
+        
+        for variant in &btc_variants {
+            if let Some(price) = all_mids.get(*variant) {
+                return price.clone();
+            }
+        }
+        
+        "0.0".to_string()
     }
     
     pub fn get_l2_orderbook(&self, coin: String) -> OrderbookData {
@@ -338,6 +377,148 @@ impl HyperliquidClient {
                 fee_token: fill["feeToken"].as_str().map(|s| s.to_string()),
             })
             .collect()
+    }
+    
+    pub fn place_limit_order(&self, asset: String, is_buy: bool, size: String, price: String, time_in_force: String) -> SwapResult {
+        let exchange = match &self.exchange {
+            Some(ex) => ex.clone(),
+            None => {
+                return SwapResult {
+                    success: false,
+                    message: "No wallet configured. Use new_with_wallet() constructor.".to_string(),
+                    order_id: None,
+                    filled_size: None,
+                    avg_price: None,
+                }
+            }
+        };
+        
+        let order_result = self.runtime.block_on(async move {
+            let size_f64: f64 = size.parse()
+                .map_err(|_| "Invalid size format")?;
+            let price_f64: f64 = price.parse()
+                .map_err(|_| "Invalid price format")?;
+            
+            // Ensure minimum order size
+            if size_f64 <= 0.0 {
+                return Err("Order size must be positive".to_string());
+            }
+            
+            // For BTC/USDC spot pair, round to appropriate precision
+            let rounded_size = if asset.contains("BTC") || asset.contains("UBTC") {
+                // BTC has 5 decimal places
+                (size_f64 * 100000.0).round() / 100000.0
+            } else {
+                // Most other assets have 6 decimal places  
+                (size_f64 * 1000000.0).round() / 1000000.0
+            };
+            
+            let rounded_price = if asset.contains("USDC") {
+                // USDC pairs typically use 2-4 decimal places
+                (price_f64 * 100.0).round() / 100.0
+            } else {
+                price_f64
+            };
+            
+            let order = ClientOrderRequest {
+                asset: asset.clone(),
+                is_buy,
+                reduce_only: false,
+                limit_px: rounded_price,
+                sz: rounded_size,
+                cloid: None,
+                order_type: ClientOrder::Limit(ClientLimit {
+                    tif: time_in_force, // "Gtc" (Good Till Cancel), "Ioc" (Immediate or Cancel), "Alo" (Add Liquidity Only)
+                }),
+            };
+            
+            let response = exchange.order(order, None).await
+                .map_err(|e| format!("Failed to place order: {}", e))?;
+            
+            match response {
+                ExchangeResponseStatus::Ok(resp) => {
+                    if let Some(data) = resp.data {
+                        if let Some(status) = data.statuses.first() {
+                            match status {
+                                ExchangeDataStatus::Filled(order) => Ok((
+                                    true,
+                                    format!("Order filled successfully"),
+                                    Some(order.oid),
+                                    Some(order.total_sz.clone()),
+                                    Some(order.avg_px.clone()),
+                                )),
+                                ExchangeDataStatus::Resting(order) => Ok((
+                                    true,
+                                    format!("Order placed and resting in orderbook"),
+                                    Some(order.oid),
+                                    None,
+                                    None,
+                                )),
+                                _ => Err(format!("Unexpected order status: {:?}", status)),
+                            }
+                        } else {
+                            Err("No order status returned".to_string())
+                        }
+                    } else {
+                        Err("No response data".to_string())
+                    }
+                }
+                ExchangeResponseStatus::Err(e) => Err(format!("Exchange error: {}", e)),
+            }
+        });
+        
+        match order_result {
+            Ok((success, message, order_id, filled_size, avg_price)) => SwapResult {
+                success,
+                message,
+                order_id,
+                filled_size,
+                avg_price,
+            },
+            Err(e) => SwapResult {
+                success: false,
+                message: e,
+                order_id: None,
+                filled_size: None,
+                avg_price: None,
+            },
+        }
+    }
+    
+    pub fn place_btc_buy_order(&self, usdc_amount: String, limit_price: String) -> SwapResult {
+        let info = self.info.clone();
+        let result = self.runtime.block_on(async move {
+            let usdc_f64: f64 = usdc_amount.parse()
+                .map_err(|_| "Invalid USDC amount format")?;
+            let price_f64: f64 = limit_price.parse()
+                .map_err(|_| "Invalid price format")?;
+            
+            // Calculate BTC size from USDC amount and limit price
+            let btc_size_raw = usdc_f64 / price_f64;
+            // Round to 5 decimal places for BTC
+            let btc_size = (btc_size_raw * 100000.0).round() / 100000.0;
+            
+            if btc_size < 0.00001 {
+                return Err(format!("Order size too small: {} BTC", btc_size));
+            }
+            
+            Ok((btc_size.to_string(), price_f64.to_string()))
+        });
+        
+        match result {
+            Ok((size, price)) => self.place_limit_order("UBTC/USDC".to_string(), true, size, price, "Gtc".to_string()),
+            Err(e) => SwapResult {
+                success: false,
+                message: e,
+                order_id: None,
+                filled_size: None,
+                avg_price: None,
+            },
+        }
+    }
+    
+    pub fn place_btc_sell_order(&self, btc_amount: String, limit_price: String) -> SwapResult {
+        self.place_limit_order("UBTC/USDC".to_string(), false, btc_amount, limit_price, "Gtc".to_string())
     }
 }
 

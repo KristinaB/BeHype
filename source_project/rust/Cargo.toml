@@ -39,3 +39,11 @@ path = "src/test_fills_simple.rs"
 [[bin]]
 name = "test_balance"
 path = "src/test_balance.rs"
+
+[[bin]]
+name = "get_btc_price"
+path = "src/get_btc_price.rs"
+
+[[bin]]
+name = "test_allmids"
+path = "src/test_allmids.rs"

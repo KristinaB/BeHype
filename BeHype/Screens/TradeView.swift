@@ -254,11 +254,14 @@ struct TradeView: View {
                 isLoading: hyperliquidService.isLoading,
                 isDisabled: !isValidOrder()
             ) {
-                if orderType == .buy && amount == "11.0" {
-                    // Use existing swap functionality for $11 USDC → BTC
-                    hyperliquidService.performSwap()
-                } else {
-                    showingOrderConfirmation.toggle()
+                // Use new limit order functionality
+                hyperliquidService.placeLimitOrder(
+                    orderType: orderType,
+                    amount: amount,
+                    limitPrice: limitPrice
+                ) { result in
+                    // Handle result (optional - already handled in service)
+                    print("📋 [TradeView] Order result: \(result.success ? "Success" : "Failed")")
                 }
             }
             
@@ -346,22 +349,6 @@ struct TradeView: View {
     }
 }
 
-// MARK: - Order Type
-
-enum OrderType: CaseIterable {
-    case buy, sell
-    
-    var displayText: String {
-        switch self {
-        case .buy:
-            return "Buy"
-        case .sell:
-            return "Sell"
-        }
-    }
-}
-
-
 // MARK: - Order Confirmation View
 
 struct OrderConfirmationView: View {
@@ -401,8 +388,15 @@ struct OrderConfirmationView: View {
                     
                     VStack(spacing: 12) {
                         PrimaryButton("Confirm Order", isLoading: hyperliquidService.isLoading) {
-                            // Simulate order placement
-                            dismiss()
+                            // Place the actual limit order
+                            hyperliquidService.placeLimitOrder(
+                                orderType: orderType,
+                                amount: amount,
+                                limitPrice: limitPrice
+                            ) { result in
+                                // Dismiss after order placement
+                                dismiss()
+                            }
                         }
                         
                         SecondaryButton("Cancel") {

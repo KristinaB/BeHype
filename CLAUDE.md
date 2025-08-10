@@ -90,7 +90,9 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - Full integration with existing Rust SDK and HyperliquidService
 
 ### Development Workflow:
-- **IMPORTANT: Always use rake tasks for building - never run cargo or xcodebuild directly**
+- **CRITICAL: Always use rake tasks for building - NEVER run cargo or xcodebuild directly**
+- **NEVER use `cargo build`, `cargo run`, or `xcodebuild` commands directly**
+- **ALWAYS use the provided rake tasks for all build operations**
 - Rust changes: `rake build_full_rust` then manual Xcode build
 - iOS changes: `rake build` 
 - SwiftUI screens integrate with existing HyperliquidService
