@@ -407,12 +407,21 @@ class HyperliquidService: ObservableObject {
             DispatchQueue.global(qos: .background).async {
                 let result: SwapResult
                 
+                // Round price to proper tick size for BTC/USDC (@142)
+                // BTC/USDC has $0.50 tick size based on market data
+                let roundedLimitPrice = self.roundPriceToTickSize(price: limitPrice, tickSize: 0.5)
+                print("📏 [DEBUG] Price rounded from $\(limitPrice) to $\(roundedLimitPrice) for tick size compliance")
+                
+                // Round BTC amount to 5 decimal places for precision compliance
+                let roundedBtcAmount = self.roundBtcAmount(amount: amount)
+                print("📏 [DEBUG] BTC amount rounded from \(amount) to \(roundedBtcAmount) for precision compliance")
+                
                 if orderType == .buy {
                     // For buy orders, amount is in USDC, convert BTC at limit price
-                    result = walletClient.placeBtcBuyOrder(usdcAmount: amount, limitPrice: limitPrice)
+                    result = walletClient.placeBtcBuyOrder(usdcAmount: amount, limitPrice: roundedLimitPrice)
                 } else {
                     // For sell orders, amount is in BTC, sell at limit price
-                    result = walletClient.placeBtcSellOrder(btcAmount: amount, limitPrice: limitPrice)
+                    result = walletClient.placeBtcSellOrder(btcAmount: roundedBtcAmount, limitPrice: roundedLimitPrice)
                 }
                 
                 DispatchQueue.main.async {
@@ -613,5 +622,19 @@ class HyperliquidService: ObservableObject {
                 }
             }.resume()
         }
+    }
+    
+    // MARK: - Price and Amount Rounding Helper Methods
+    
+    private func roundPriceToTickSize(price: String, tickSize: Double) -> String {
+        guard let priceDouble = Double(price) else { return price }
+        let rounded = (priceDouble / tickSize).rounded() * tickSize
+        return String(format: "%.1f", rounded)
+    }
+    
+    private func roundBtcAmount(amount: String) -> String {
+        guard let amountDouble = Double(amount) else { return amount }
+        let rounded = (amountDouble * 100000).rounded() / 100000 // Round to 5 decimal places
+        return String(format: "%.5f", rounded)
     }
 }

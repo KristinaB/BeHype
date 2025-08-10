@@ -28,7 +28,8 @@
       "Bash(CARGO_NET_GIT_FETCH_WITH_CLI=true rake build_rust)",
       "Bash(cargo clean:*)",
       "Bash(grep:*)",
-      "Bash(cargo swift package:*)"
+      "Bash(cargo swift package:*)",
+      "Bash(./target/release/test_sell_limit)"
     ],
     "deny": []
   }
