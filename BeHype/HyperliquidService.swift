@@ -132,8 +132,8 @@ class HyperliquidService: ObservableObject {
                     self.usdcBalance = "0.0"
                 }
                 
-                // Update BTC balance
-                if let btcBalance = balances.first(where: { $0.coin == "BTC" }) {
+                // Update BTC balance (UBTC is the spot BTC token on Hyperliquid)
+                if let btcBalance = balances.first(where: { $0.coin == "BTC" || $0.coin == "UBTC" }) {
                     self.btcBalance = btcBalance.total
                 } else {
                     self.btcBalance = "0.0"

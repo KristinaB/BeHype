@@ -35,3 +35,7 @@ path = "src/test_fills.rs"
 [[bin]]
 name = "test_fills_simple"
 path = "src/test_fills_simple.rs"
+
+[[bin]]
+name = "test_balance"
+path = "src/test_balance.rs"
