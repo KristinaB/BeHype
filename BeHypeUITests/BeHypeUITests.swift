@@ -129,10 +129,10 @@ final class BeHypeUITests: XCTestCase {
       "Search field should exist")
 
     // Wait for either empty state or transaction list to be rendered
-    let hasEmptyState = app.staticTexts["No Transactions Yet"].waitForExistence(timeout: 1)
+    let hasEmptyState = app.staticTexts["No Fills Yet"].waitForExistence(timeout: 1)
     let hasTransactionList = app.staticTexts["BTC/USDC"].waitForExistence(timeout: 1)
     XCTAssertTrue(
-      hasEmptyState || hasTransactionList, "Should show either empty state or transactions")
+      hasEmptyState || hasTransactionList, "Should show either empty state or fills")
   }
 
   private func testChartFromHome(_ app: XCUIApplication) {
