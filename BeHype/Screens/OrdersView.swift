@@ -18,10 +18,10 @@ struct OrdersView: View {
         Color.appBackground
           .ignoresSafeArea()
 
-        VStack(spacing: 16) {
+        VStack(spacing: 0) {
           // Filter and Search
           filterSection
-
+          
           // Transaction List
           if filteredItems.isEmpty {
             emptyStateView
@@ -94,8 +94,9 @@ struct OrdersView: View {
           }
         }
       }
-      .padding(.top)
-      .padding(.bottom, 100) // Extra bottom padding to ensure last item is visible above tab bar
+      .padding(.top, 16)
+      .padding(.bottom, 120) // Ensure last item is visible above tab bar
+      .padding(.horizontal, 0) // Remove any horizontal padding from scroll content
     }
   }
 
