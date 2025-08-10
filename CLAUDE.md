@@ -127,6 +127,7 @@ When debugging iOS apps with missing resources or initialization issues:
 - **Mock System**: UI tests use mock responses for order placement to avoid real trades
 - **Real Data**: Read-only operations (balances, prices) use real SDK calls for authentic testing
 - **iPhone 16 Simulator**: All testing should be done on iPhone 16 simulator
+- **Test Scripts**: All Swift test and debug scripts are organized in `test_scripts/` directory
 - **IMPORTANT**: Never run test commands directly - always ask the user to run them and provide the output for analysis
 
 ### Claude Code Configuration:
