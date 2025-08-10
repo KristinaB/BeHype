@@ -27,6 +27,10 @@ struct OrdersView: View {
             emptyStateView
           } else {
             transactionsList
+              .safeAreaInset(edge: .bottom) {
+                // Ensure content doesn't get hidden behind tab bar
+                Color.clear.frame(height: 80)
+              }
           }
         }
       }
@@ -93,11 +97,15 @@ struct OrdersView: View {
               .padding(.horizontal)
           }
         }
+        
+        // Invisible spacer to ensure last item is always visible
+        Color.clear
+          .frame(height: 20)
       }
       .padding(.top, 16)
-      .padding(.bottom, 150) // Extra bottom padding to ensure last item is fully visible above tab bar
-      .padding(.horizontal, 0) // Remove any horizontal padding from scroll content
+      .padding(.bottom, 0)
     }
+    .clipped() // Prevent content from extending beyond bounds
   }
 
   private var emptyStateView: some View {
