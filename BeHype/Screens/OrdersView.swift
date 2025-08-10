@@ -519,7 +519,7 @@ struct OpenOrderRow: View {
         performCancelOrder()
       }
     } message: {
-      Text("Are you sure you want to cancel this \\(order.displaySide.lowercased()) order for \\(order.sz) \\(order.displayCoin) at $\\(order.limitPx)?")
+      Text("Are you sure you want to cancel this order?")
     }
   }
   
