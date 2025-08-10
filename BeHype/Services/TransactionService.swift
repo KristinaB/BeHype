@@ -10,6 +10,7 @@ import SwiftUI
 
 class TransactionService: ObservableObject {
   @Published var userFills: [UserFill] = []
+  @Published var openOrders: [OpenOrder] = []
   @Published var isLoading: Bool = false
   @Published var status: String = ""
 
@@ -17,6 +18,135 @@ class TransactionService: ObservableObject {
 
   init(walletService: WalletService) {
     self.walletService = walletService
+  }
+
+  func fetchOpenOrders() {
+    print("🔍 [TransactionService] Starting fetchOpenOrders...")
+    
+    // Check if running in UI test mock mode
+    if MockManager.shared.isUITestMockMode {
+      print("🧪 [UI TEST] Using mock open orders data")
+      let mockOrders = MockManager.shared.generateMockOpenOrders()
+      
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        self.openOrders = mockOrders
+        self.status = "✅ Found \(mockOrders.count) mock open orders"
+      }
+      return
+    }
+    
+    guard let walletService = walletService,
+          !walletService.walletAddress.isEmpty
+    else {
+      print("❌ [TransactionService] Wallet address is empty")
+      status = "❌ Wallet not loaded"
+      return
+    }
+    
+    isLoading = true
+    status = "🔍 Fetching open orders..."
+    
+    DispatchQueue.global(qos: .background).async {
+      let requestBody: [String: Any] = [
+        "type": "frontendOpenOrders",
+        "user": walletService.walletAddress,
+        "dex": ""
+      ]
+      
+      guard let jsonData = try? JSONSerialization.data(withJSONObject: requestBody) else {
+        DispatchQueue.main.async {
+          self.status = "❌ Failed to create request"
+          self.isLoading = false
+        }
+        return
+      }
+      
+      var request = URLRequest(url: URL(string: "https://api.hyperliquid.xyz/info")!)
+      request.httpMethod = "POST"
+      request.httpBody = jsonData
+      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+      
+      URLSession.shared.dataTask(with: request) { data, response, error in
+        DispatchQueue.main.async {
+          self.isLoading = false
+          
+          if let error = error {
+            print("❌ [TransactionService] Network error: \(error)")
+            self.status = "❌ Network error"
+            return
+          }
+          
+          guard let data = data else {
+            print("❌ [TransactionService] No data received")
+            self.status = "❌ No data received"
+            return
+          }
+          
+          do {
+            if let ordersArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
+              print("✅ [TransactionService] Received \(ordersArray.count) open orders")
+              
+              let orders = ordersArray.compactMap { orderData -> OpenOrder? in
+                guard let coin = orderData["coin"] as? String,
+                      let limitPx = orderData["limitPx"] as? String,
+                      let oid = orderData["oid"] as? UInt64,
+                      let orderType = orderData["orderType"] as? String,
+                      let origSz = orderData["origSz"] as? String,
+                      let side = orderData["side"] as? String,
+                      let sz = orderData["sz"] as? String,
+                      let tif = orderData["tif"] as? String,
+                      let timestamp = orderData["timestamp"] as? UInt64
+                else {
+                  print("⚠️ [TransactionService] Skipping malformed open order data")
+                  return nil
+                }
+                
+                let children = orderData["children"] as? [String] ?? []
+                let isPositionTpsl = orderData["isPositionTpsl"] as? Bool ?? false
+                let isTrigger = orderData["isTrigger"] as? Bool ?? false
+                let reduceOnly = orderData["reduceOnly"] as? Bool ?? false
+                let triggerCondition = orderData["triggerCondition"] as? String ?? ""
+                let triggerPx = orderData["triggerPx"] as? String ?? ""
+                
+                return OpenOrder(
+                  children: children,
+                  coin: coin,
+                  isPositionTpsl: isPositionTpsl,
+                  isTrigger: isTrigger,
+                  limitPx: limitPx,
+                  oid: oid,
+                  orderType: orderType,
+                  origSz: origSz,
+                  reduceOnly: reduceOnly,
+                  side: side,
+                  sz: sz,
+                  tif: tif,
+                  timestamp: timestamp,
+                  triggerCondition: triggerCondition,
+                  triggerPx: triggerPx
+                )
+              }
+              
+              self.openOrders = orders
+              self.status = "✅ Found \(orders.count) open orders"
+              
+              // Log first order for debugging
+              if let firstOrder = orders.first {
+                print(
+                  "🔍 [TransactionService] Sample order: \(firstOrder.displayCoin) \(firstOrder.displaySide) \(firstOrder.sz) at \(firstOrder.limitPx)"
+                )
+              }
+            } else {
+              print("❌ [TransactionService] Invalid response format")
+              self.status = "❌ Invalid response format"
+            }
+          } catch {
+            print("❌ [TransactionService] JSON parsing error: \(error)")
+            self.status = "❌ Failed to parse response"
+          }
+        }
+      }.resume()
+    }
   }
 
   func fetchUserFills(daysBack: Int = 30) {

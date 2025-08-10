@@ -127,4 +127,46 @@ class MockManager {
       ),
     ]
   }
+  
+  // Generate mock open orders data for testing
+  func generateMockOpenOrders() -> [OpenOrder] {
+    let currentTime = UInt64(Date().timeIntervalSince1970 * 1000)
+    
+    return [
+      OpenOrder(
+        children: [],
+        coin: "@142",
+        isPositionTpsl: false,
+        isTrigger: false,
+        limitPx: "119000.0",
+        oid: 130_243_368_001,
+        orderType: "limit",
+        origSz: "0.00010",
+        reduceOnly: false,
+        side: "B",
+        sz: "0.00010",
+        tif: "Gtc",
+        timestamp: currentTime - 1_800_000,  // 30 minutes ago
+        triggerCondition: "",
+        triggerPx: ""
+      ),
+      OpenOrder(
+        children: [],
+        coin: "@142",
+        isPositionTpsl: false,
+        isTrigger: false,
+        limitPx: "117500.0",
+        oid: 130_243_368_002,
+        orderType: "limit",
+        origSz: "0.00012",
+        reduceOnly: false,
+        side: "A",
+        sz: "0.00012",
+        tif: "Gtc",
+        timestamp: currentTime - 900_000,   // 15 minutes ago
+        triggerCondition: "",
+        triggerPx: ""
+      ),
+    ]
+  }
 }

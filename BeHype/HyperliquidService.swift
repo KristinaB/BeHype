@@ -61,6 +61,10 @@ class HyperliquidService: ObservableObject {
   var userFills: [UserFill] {
     return transactionService.userFills
   }
+  
+  var openOrders: [OpenOrder] {
+    return transactionService.openOrders
+  }
 
   var walletAddress: String {
     return walletService.walletAddress
@@ -186,5 +190,9 @@ class HyperliquidService: ObservableObject {
 
   func fetchUserFills(daysBack: Int = 30) {
     transactionService.fetchUserFills(daysBack: daysBack)
+  }
+  
+  func fetchOpenOrders() {
+    transactionService.fetchOpenOrders()
   }
 }

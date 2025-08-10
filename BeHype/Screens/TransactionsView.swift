@@ -23,10 +23,10 @@ struct TransactionsView: View {
           filterSection
 
           // Transaction List
-          if filteredFills.isEmpty {
+          if filteredItems.isEmpty {
             emptyStateView
           } else {
-            fillsList
+            transactionsList
           }
         }
       }
@@ -35,16 +35,16 @@ struct TransactionsView: View {
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
           IconButton(icon: "arrow.clockwise") {
-            hyperliquidService.fetchUserFills()
+            refreshData()
           }
         }
       }
     }
     .onAppear {
-      hyperliquidService.fetchUserFills()
+      refreshData()
     }
     .onChange(of: hyperliquidService.lastSwapResult) {
-      hyperliquidService.fetchUserFills()
+      refreshData()
     }
   }
 
@@ -80,12 +80,18 @@ struct TransactionsView: View {
     }
   }
 
-  private var fillsList: some View {
+  private var transactionsList: some View {
     ScrollView {
       LazyVStack(spacing: 12) {
-        ForEach(filteredFills, id: \.hash) { fill in
-          FillRow(fill: fill)
-            .padding(.horizontal)
+        ForEach(filteredItems, id: \.id) { item in
+          switch item {
+          case .fill(let fill):
+            FillRow(fill: fill)
+              .padding(.horizontal)
+          case .openOrder(let order):
+            OpenOrderRow(order: order)
+              .padding(.horizontal)
+          }
         }
       }
       .padding(.vertical)
@@ -125,7 +131,89 @@ struct TransactionsView: View {
     .padding()
   }
 
+  // MARK: - Transaction Item Types
+  
+  enum TransactionItem: Identifiable {
+    case fill(UserFill)
+    case openOrder(OpenOrder)
+    
+    var id: String {
+      switch self {
+      case .fill(let fill):
+        return "fill_\(fill.hash)"
+      case .openOrder(let order):
+        return "order_\(order.oid)"
+      }
+    }
+    
+    var timestamp: UInt64 {
+      switch self {
+      case .fill(let fill):
+        return fill.time
+      case .openOrder(let order):
+        return order.timestamp
+      }
+    }
+  }
+
   // MARK: - Computed Properties
+
+  private var filteredItems: [TransactionItem] {
+    var items: [TransactionItem] = []
+    
+    // Add fills based on filter
+    let fills = hyperliquidService.userFills.filter { fill in
+      switch selectedFilter {
+      case .all, .confirmed:
+        return true
+      case .pending:
+        return false  // Fills are never pending
+      case .failed:
+        return false  // We only get successful fills
+      case .buys:
+        return fill.isBuy
+      case .sells:
+        return !fill.isBuy
+      }
+    }
+    items.append(contentsOf: fills.map { TransactionItem.fill($0) })
+    
+    // Add open orders based on filter
+    let orders = hyperliquidService.openOrders.filter { order in
+      switch selectedFilter {
+      case .all, .pending:
+        return true
+      case .confirmed, .failed:
+        return false  // Open orders are not confirmed or failed
+      case .buys:
+        return order.side == "B"
+      case .sells:
+        return order.side == "A"
+      }
+    }
+    items.append(contentsOf: orders.map { TransactionItem.openOrder($0) })
+    
+    // Apply search filter
+    let filtered = items.filter { item in
+      if !searchText.isEmpty {
+        let searchLower = searchText.lowercased()
+        switch item {
+        case .fill(let fill):
+          return fill.displayCoin.lowercased().contains(searchLower) ||
+                 fill.hash.lowercased().contains(searchLower) ||
+                 fill.displaySide.lowercased().contains(searchLower)
+        case .openOrder(let order):
+          return order.displayCoin.lowercased().contains(searchLower) ||
+                 String(order.oid).contains(searchLower) ||
+                 order.displaySide.lowercased().contains(searchLower)
+        }
+      }
+      return true
+    }
+    
+    // Sort by timestamp (newest first)
+    return filtered.sorted { $0.timestamp > $1.timestamp }
+  }
 
   private var filteredFills: [UserFill] {
     let allFills = hyperliquidService.userFills
@@ -165,6 +253,11 @@ struct TransactionsView: View {
   }
 
   // MARK: - Private Methods
+  
+  private func refreshData() {
+    hyperliquidService.fetchUserFills()
+    hyperliquidService.fetchOpenOrders()
+  }
 
   private func getEmptyStateTitle() -> String {
     switch selectedFilter {
@@ -308,6 +401,100 @@ struct FillRow: View {
       // For sell orders, show USDC received
       let usdcReceived = sizeValue * priceValue
       return String(format: "%.2f USDC", usdcReceived)
+    }
+  }
+}
+
+// MARK: - Open Order Row
+
+struct OpenOrderRow: View {
+  let order: OpenOrder
+  
+  var body: some View {
+    AppCard {
+      HStack {
+        // Order Icon and Type
+        VStack(spacing: 8) {
+          ZStack {
+            Circle()
+              .fill(Color.primaryGradientStart.opacity(0.2))
+              .frame(width: 40, height: 40)
+            
+            Image(systemName: "clock.fill")
+              .font(.headline)
+              .foregroundColor(.primaryGradientStart)
+          }
+          
+          Text("PENDING")
+            .font(.caption2)
+            .fontWeight(.bold)
+            .foregroundColor(.primaryGradientStart)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+              RoundedRectangle(cornerRadius: 4)
+                .fill(Color.primaryGradientStart.opacity(0.2))
+            )
+        }
+        
+        // Order Details
+        VStack(alignment: .leading, spacing: 8) {
+          HStack {
+            Text(order.displayCoin)
+              .cardTitle()
+            
+            Spacer()
+            
+            Text(order.displaySide.uppercased())
+              .font(.caption)
+              .fontWeight(.bold)
+              .foregroundColor(order.side == "B" ? .bullishGreen : .bearishRed)
+          }
+          
+          HStack {
+            VStack(alignment: .leading, spacing: 4) {
+              Text("Size")
+                .captionText()
+              
+              Text("\(order.sz) \(order.side == "B" ? "USDC" : "BTC")")
+                .secondaryText()
+                .fontWeight(.medium)
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 4) {
+              Text("Limit Price")
+                .captionText()
+              
+              Text("$\(order.limitPx)")
+                .secondaryText()
+                .fontWeight(.medium)
+            }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: 4) {
+              Text("Type")
+                .captionText()
+              
+              Text(order.displayOrderType)
+                .priceText()
+                .font(.subheadline)
+            }
+          }
+          
+          HStack {
+            Text(order.displayDate)
+              .captionText()
+            
+            Spacer()
+            
+            Text("TIF: \(order.tif)")
+              .captionText()
+          }
+        }
+      }
     }
   }
 }

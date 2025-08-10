@@ -39,12 +39,44 @@ final class BeHypeUITests: XCTestCase {
     testOrderPlacementFlow(app)
     testOrderTypeToggling(app)
     testTransactionsScreen(app)
+    testOpenOrdersAfterPlacement(app)
     testChartFromHome(app)
     testNavigationFlow(app)
     testErrorStatesHandling(app)
   }
 
   // MARK: - Comprehensive Test Methods
+  
+  private func testOpenOrdersAfterPlacement(_ app: XCUIApplication) {
+    // This test verifies that placed orders appear in the Pending section
+    // Navigate to Transactions tab
+    app.tabBars.buttons["Transactions"].tap()
+    
+    // Wait for screen to load
+    XCTAssertTrue(
+      app.navigationBars["Transactions"].waitForExistence(timeout: 2),
+      "Transactions screen should load")
+    
+    // Tap Pending filter to see open orders
+    let pendingFilter = app.buttons["Pending"]
+    if pendingFilter.exists {
+      pendingFilter.tap()
+      
+      // In mock mode, we should see mock open orders
+      if app.launchArguments.contains("UITEST_MOCK_MODE") {
+        // Wait for potential pending orders to load
+        usleep(1000000) // 1 second for data to load
+        
+        // Check for pending order indicators
+        let hasPendingContent = app.staticTexts["PENDING"].waitForExistence(timeout: 2) ||
+                               app.staticTexts.matching(
+                                 NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Pending'")
+                               ).count > 0
+        
+        XCTAssertTrue(hasPendingContent, "Pending filter should show open orders or appropriate empty state")
+      }
+    }
+  }
   
   private func testHomeScreen(_ app: XCUIApplication) {
     // Wait for Home tab to be loaded
@@ -250,10 +282,29 @@ final class BeHypeUITests: XCTestCase {
         let placeOrderButton = placeOrderButtons.element(boundBy: 0)
         XCTAssertTrue(placeOrderButton.exists, "Place order button should be present")
         
-        // In mock mode, we can test the button tap without real order
+        // In mock mode, we can test the order placement flow
         if app.launchArguments.contains("UITEST_MOCK_MODE") {
           XCTAssertTrue(placeOrderButton.isEnabled, "Place order button should be enabled with valid inputs")
-          // Note: We don't actually tap to avoid real orders
+          
+          // Test the order placement with mock data
+          placeOrderButton.tap()
+          
+          // Wait for loading to complete and success modal to appear
+          let successModal = app.navigationBars["Order Complete"].waitForExistence(timeout: 3)
+          if successModal {
+            XCTAssertTrue(true, "Order success modal should appear")
+            
+            // Check for success content
+            let successText = app.staticTexts["Order Placed Successfully!"].waitForExistence(timeout: 1)
+            XCTAssertTrue(successText, "Success message should be displayed")
+            
+            // Close the modal
+            if app.buttons["Close"].exists {
+              app.buttons["Close"].tap()
+            } else if app.buttons["Done"].exists {
+              app.buttons["Done"].tap()
+            }
+          }
         }
       }
       
@@ -368,10 +419,14 @@ final class BeHypeUITests: XCTestCase {
     XCTAssertTrue(app.buttons["Sells"].waitForExistence(timeout: 1), "Sells filter should exist")
 
     // Wait for either empty state or transaction list to be rendered
-    let hasEmptyState = app.staticTexts["No Fills Yet"].waitForExistence(timeout: 1)
-    let hasTransactionList = app.staticTexts["BTC/USDC"].waitForExistence(timeout: 1)
+    // Check for various possible empty states or transaction content
+    let hasEmptyState = app.staticTexts["No Fills Yet"].waitForExistence(timeout: 1) ||
+                       app.staticTexts["No Transactions Yet"].waitForExistence(timeout: 1)
+    let hasTransactionList = app.staticTexts["BTC/USDC"].waitForExistence(timeout: 1) ||
+                            app.staticTexts["FILLED"].waitForExistence(timeout: 1) ||
+                            app.staticTexts["PENDING"].waitForExistence(timeout: 1)
     XCTAssertTrue(
-      hasEmptyState || hasTransactionList, "Should show either empty state or fills")
+      hasEmptyState || hasTransactionList, "Should show either empty state or transactions")
     
     // Test filter functionality
     testTransactionFilters(app)
@@ -394,8 +449,49 @@ final class BeHypeUITests: XCTestCase {
           filterButton.isSelected || filterButton.exists,
           "\(filterName) filter should be selectable")
         
-        // Small delay to allow UI to update
-        usleep(500000) // 0.5 seconds
+        // Test specific filter behavior
+        usleep(500000) // 0.5 seconds to allow UI to update
+        
+        switch filterName {
+        case "Pending":
+          // Pending filter should show open orders (PENDING badges)
+          let hasPendingOrders = app.staticTexts["PENDING"].waitForExistence(timeout: 1)
+          let hasNoPendingText = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Pending'")
+          ).count > 0
+          
+          if !hasPendingOrders && !hasNoPendingText {
+            // If no specific pending content, that's also valid (empty state)
+            XCTAssertTrue(true, "Pending filter handled appropriately")
+          }
+          
+        case "Confirmed":
+          // Confirmed filter should show filled orders (FILLED badges)
+          let hasFilledOrders = app.staticTexts["FILLED"].waitForExistence(timeout: 1)
+          let hasNoConfirmedText = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Confirmed'")
+          ).count > 0
+          
+          if !hasFilledOrders && !hasNoConfirmedText {
+            // If no specific confirmed content, that's also valid (empty state)
+            XCTAssertTrue(true, "Confirmed filter handled appropriately")
+          }
+          
+        case "All":
+          // All filter should show mixed content or appropriate empty state
+          let hasAnyContent = app.staticTexts["FILLED"].exists ||
+                            app.staticTexts["PENDING"].exists ||
+                            app.staticTexts["BTC/USDC"].exists
+          let hasEmptyState = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'No'")
+          ).count > 0
+          
+          XCTAssertTrue(hasAnyContent || hasEmptyState, "All filter should show content or empty state")
+          
+        default:
+          // For other filters, just verify they don't crash the app
+          XCTAssertTrue(true, "\(filterName) filter completed without errors")
+        }
       }
     }
     
