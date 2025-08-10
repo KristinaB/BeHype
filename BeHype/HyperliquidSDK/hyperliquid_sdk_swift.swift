@@ -499,6 +499,8 @@ fileprivate struct FfiConverterString: FfiConverter {
 
 public protocol HyperliquidClientProtocol: AnyObject, Sendable {
     
+    func cancelOrder(asset: String, orderId: UInt64)  -> SwapResult
+    
     func getAllMids()  -> [PriceInfo]
     
     func getBtcPrice()  -> String
@@ -590,6 +592,15 @@ public static func newWithWallet(privateKey: String) -> HyperliquidClient  {
 }
     
 
+    
+open func cancelOrder(asset: String, orderId: UInt64) -> SwapResult  {
+    return try!  FfiConverterTypeSwapResult_lift(try! rustCall() {
+    uniffi_hyperliquid_sdk_swift_fn_method_hyperliquidclient_cancel_order(self.uniffiClonePointer(),
+        FfiConverterString.lower(asset),
+        FfiConverterUInt64.lower(orderId),$0
+    )
+})
+}
     
 open func getAllMids() -> [PriceInfo]  {
     return try!  FfiConverterSequenceTypePriceInfo.lift(try! rustCall() {
@@ -1826,6 +1837,9 @@ private let initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_func_hello_hyperliquid() != 20359) {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_cancel_order() != 44132) {
         return InitializationResult.apiChecksumMismatch
     }
     if (uniffi_hyperliquid_sdk_swift_checksum_method_hyperliquidclient_get_all_mids() != 11924) {

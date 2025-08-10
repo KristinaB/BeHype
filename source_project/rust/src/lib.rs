@@ -1,6 +1,6 @@
 uniffi::setup_scaffolding!();
 
-use hyperliquid_rust_sdk::{BaseUrl, InfoClient, ExchangeClient, ClientOrderRequest, ClientOrder, ClientLimit, ExchangeResponseStatus, ExchangeDataStatus};
+use hyperliquid_rust_sdk::{BaseUrl, InfoClient, ExchangeClient, ClientOrderRequest, ClientOrder, ClientLimit, ExchangeResponseStatus, ExchangeDataStatus, ClientCancelRequest};
 use ethers::signers::{LocalWallet, Signer};
 use std::sync::Arc;
 use tokio::runtime::Runtime;
@@ -519,6 +519,57 @@ impl HyperliquidClient {
     
     pub fn place_btc_sell_order(&self, btc_amount: String, limit_price: String) -> SwapResult {
         self.place_limit_order("UBTC/USDC".to_string(), false, btc_amount, limit_price, "Gtc".to_string())
+    }
+    
+    pub fn cancel_order(&self, asset: String, order_id: u64) -> SwapResult {
+        let exchange = match &self.exchange {
+            Some(ex) => ex.clone(),
+            None => {
+                return SwapResult {
+                    success: false,
+                    message: "No wallet configured. Use new_with_wallet() constructor.".to_string(),
+                    order_id: None,
+                    filled_size: None,
+                    avg_price: None,
+                }
+            }
+        };
+        
+        let cancel_result = self.runtime.block_on(async move {
+            let cancel_request = ClientCancelRequest {
+                asset: asset.clone(),
+                oid: order_id,
+            };
+            
+            let response = exchange.cancel(cancel_request, None).await
+                .map_err(|e| format!("Failed to cancel order: {}", e))?;
+            
+            match response {
+                ExchangeResponseStatus::Ok(resp) => {
+                    Ok((true, format!("Order {} cancelled successfully", order_id)))
+                }
+                ExchangeResponseStatus::Err(e) => {
+                    Err(format!("Cancel failed: {}", e))
+                }
+            }
+        });
+        
+        match cancel_result {
+            Ok((success, message)) => SwapResult {
+                success,
+                message,
+                order_id: Some(order_id),
+                filled_size: None,
+                avg_price: None,
+            },
+            Err(e) => SwapResult {
+                success: false,
+                message: e,
+                order_id: Some(order_id),
+                filled_size: None,
+                avg_price: None,
+            },
+        }
     }
 }
 

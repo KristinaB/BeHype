@@ -526,10 +526,10 @@ struct OpenOrderRow: View {
   private func performCancelOrder() {
     isCancelling = true
     
-    // For @142 (BTC/USDC), asset ID is 10142
-    let assetId: UInt32 = order.coin == "@142" ? 10142 : 0
+    // Use the asset string directly (e.g., "@142" for BTC/USDC)
+    let assetString = order.coin
     
-    hyperliquidService.cancelOrder(asset: assetId, orderId: order.oid) { success, message in
+    hyperliquidService.cancelOrder(asset: assetString, orderId: order.oid) { success, message in
       DispatchQueue.main.async {
         self.isCancelling = false
         

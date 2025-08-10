@@ -212,7 +212,7 @@ class TradingService: ObservableObject {
   
   // MARK: - Cancel Order Functionality
   
-  func cancelOrder(asset: UInt32, orderId: UInt64, completion: @escaping (Bool, String) -> Void) {
+  func cancelOrder(asset: String, orderId: UInt64, completion: @escaping (Bool, String) -> Void) {
     print("🚫 [TradingService] Starting cancelOrder for asset: \(asset), orderId: \(orderId)")
     
     guard let walletService = walletService,
@@ -227,7 +227,7 @@ class TradingService: ObservableObject {
     status = "🚫 Cancelling order..."
     
     DispatchQueue.global(qos: .background).async {
-      // Use bulk_cancel format: {"a": asset, "o": orderId}
+      // Use the Rust SDK's cancel_order method with asset string
       let result = walletClient.cancelOrder(asset: asset, orderId: orderId)
       
       DispatchQueue.main.async {
