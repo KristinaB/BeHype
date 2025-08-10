@@ -37,6 +37,10 @@ name = "test_price_rounding"
 path = "src/test_price_rounding.rs"
 
 [[bin]]
+name = "test_real_market_sell"
+path = "src/test_real_market_sell.rs"
+
+[[bin]]
 name = "test_fills"
 path = "src/test_fills.rs"
 
