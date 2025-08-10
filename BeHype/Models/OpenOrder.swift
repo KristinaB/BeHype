@@ -75,7 +75,7 @@ extension OpenOrder {
   }
   
   public var displayStatus: String {
-    return "Pending"
+    return "Open"
   }
   
   public var displayDate: String {

@@ -195,4 +195,8 @@ class HyperliquidService: ObservableObject {
   func fetchOpenOrders() {
     transactionService.fetchOpenOrders()
   }
+  
+  func cancelOrder(asset: UInt32, orderId: UInt64, completion: @escaping (Bool, String) -> Void) {
+    tradingService.cancelOrder(asset: asset, orderId: orderId, completion: completion)
+  }
 }

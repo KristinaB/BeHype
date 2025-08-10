@@ -524,12 +524,12 @@ struct OrderSuccessView: View {
           }
           
           VStack(spacing: 12) {
-            PrimaryButton("View Transactions") {
+            PrimaryButton("View Orders") {
               onDone()
               dismiss()
-              // Post notification to switch to transactions tab
+              // Post notification to switch to orders tab
               NotificationCenter.default.post(
-                name: NSNotification.Name("SwitchToTransactionsTab"),
+                name: NSNotification.Name("SwitchToOrdersTab"),
                 object: nil
               )
             }

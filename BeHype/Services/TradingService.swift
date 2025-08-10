@@ -209,4 +209,40 @@ class TradingService: ObservableObject {
     let rounded = (amountDouble * 100_000).rounded() / 100_000  // Round to 5 decimal places
     return String(format: "%.5f", rounded)
   }
+  
+  // MARK: - Cancel Order Functionality
+  
+  func cancelOrder(asset: UInt32, orderId: UInt64, completion: @escaping (Bool, String) -> Void) {
+    print("🚫 [TradingService] Starting cancelOrder for asset: \(asset), orderId: \(orderId)")
+    
+    guard let walletService = walletService,
+          let walletClient = walletService.getWalletClient()
+    else {
+      print("❌ [TradingService] Wallet client not available")
+      completion(false, "Wallet not loaded")
+      return
+    }
+    
+    isLoading = true
+    status = "🚫 Cancelling order..."
+    
+    DispatchQueue.global(qos: .background).async {
+      // Use bulk_cancel format: {"a": asset, "o": orderId}
+      let result = walletClient.cancelOrder(asset: asset, orderId: orderId)
+      
+      DispatchQueue.main.async {
+        self.isLoading = false
+        
+        if result.success {
+          self.status = "✅ Order cancelled successfully"
+          print("✅ [TradingService] Order cancelled: \(result.message)")
+          completion(true, result.message)
+        } else {
+          self.status = "❌ Failed to cancel order"
+          print("❌ [TradingService] Cancel failed: \(result.message)")
+          completion(false, result.message)
+        }
+      }
+    }
+  }
 }

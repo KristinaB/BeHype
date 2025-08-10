@@ -1,15 +1,15 @@
 //
-//  TransactionsView.swift
+//  OrdersView.swift
 //  BeHype
 //
-//  Transaction history screen with filtering and status tracking
+//  Orders screen with filtering and status tracking for fills and open orders
 //
 
 import SwiftUI
 
-struct TransactionsView: View {
+struct OrdersView: View {
   @ObservedObject var hyperliquidService: HyperliquidService
-  @State private var selectedFilter: TransactionFilter = .all
+  @State private var selectedFilter: OrderFilter = .all
   @State private var searchText = ""
 
   var body: some View {
@@ -30,7 +30,7 @@ struct TransactionsView: View {
           }
         }
       }
-      .navigationTitle("Transactions")
+      .navigationTitle("Orders")
       .navigationBarTitleDisplayMode(.large)
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
@@ -63,7 +63,7 @@ struct TransactionsView: View {
 
           ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-              ForEach(TransactionFilter.allCases, id: \.self) { filter in
+              ForEach(OrderFilter.allCases, id: \.self) { filter in
                 FilterButton(
                   title: filter.displayText,
                   isSelected: selectedFilter == filter
@@ -89,7 +89,7 @@ struct TransactionsView: View {
             FillRow(fill: fill)
               .padding(.horizontal)
           case .openOrder(let order):
-            OpenOrderRow(order: order)
+            OpenOrderRow(order: order, hyperliquidService: hyperliquidService)
               .padding(.horizontal)
           }
         }
@@ -166,8 +166,8 @@ struct TransactionsView: View {
       switch selectedFilter {
       case .all, .confirmed:
         return true
-      case .pending:
-        return false  // Fills are never pending
+      case .open:
+        return false  // Fills are never open
       case .failed:
         return false  // We only get successful fills
       case .buys:
@@ -181,7 +181,7 @@ struct TransactionsView: View {
     // Add open orders based on filter
     let orders = hyperliquidService.openOrders.filter { order in
       switch selectedFilter {
-      case .all, .pending:
+      case .all, .open:
         return true
       case .confirmed, .failed:
         return false  // Open orders are not confirmed or failed
@@ -223,8 +223,8 @@ struct TransactionsView: View {
       switch selectedFilter {
       case .all:
         break
-      case .pending:
-        // For real fills, we only show completed ones, so skip pending filter
+      case .open:
+        // For real fills, we only show completed ones, so skip open filter
         return false
       case .confirmed:
         // All fills are confirmed
@@ -263,8 +263,8 @@ struct TransactionsView: View {
     switch selectedFilter {
     case .all:
       return "No Fills Yet"
-    case .pending:
-      return "No Pending Fills"
+    case .open:
+      return "No Open Orders"
     case .confirmed:
       return "No Confirmed Fills"
     case .failed:
@@ -280,8 +280,8 @@ struct TransactionsView: View {
     switch selectedFilter {
     case .all:
       return "Start trading to see your fill history here."
-    case .pending:
-      return "All your fills have been processed."
+    case .open:
+      return "No open orders found."
     case .confirmed:
       return "You don't have any confirmed fills yet."
     case .failed:
@@ -409,6 +409,9 @@ struct FillRow: View {
 
 struct OpenOrderRow: View {
   let order: OpenOrder
+  @ObservedObject var hyperliquidService: HyperliquidService
+  @State private var showingCancelConfirmation = false
+  @State private var isCancelling = false
   
   var body: some View {
     AppCard {
@@ -425,7 +428,7 @@ struct OpenOrderRow: View {
               .foregroundColor(.primaryGradientStart)
           }
           
-          Text("PENDING")
+          Text("OPEN")
             .font(.caption2)
             .fontWeight(.bold)
             .foregroundColor(.primaryGradientStart)
@@ -493,7 +496,48 @@ struct OpenOrderRow: View {
             Text("TIF: \(order.tif)")
               .captionText()
           }
+          
+          // Cancel Button
+          HStack {
+            Spacer()
+            
+            SmallButton(
+              isCancelling ? "Cancelling..." : "Cancel Order", 
+              icon: isCancelling ? "clock" : "xmark.circle"
+            ) {
+              showingCancelConfirmation = true
+            }
+            .disabled(isCancelling)
+          }
+          .padding(.top, 8)
         }
+      }
+    }
+    .alert("Cancel Order", isPresented: $showingCancelConfirmation) {
+      Button("Cancel", role: .cancel) { }
+      Button("Confirm", role: .destructive) {
+        performCancelOrder()
+      }
+    } message: {
+      Text("Are you sure you want to cancel this \\(order.displaySide.lowercased()) order for \\(order.sz) \\(order.displayCoin) at $\\(order.limitPx)?")
+    }
+  }
+  
+  private func performCancelOrder() {
+    isCancelling = true
+    
+    // For @142 (BTC/USDC), asset ID is 10142
+    let assetId: UInt32 = order.coin == "@142" ? 10142 : 0
+    
+    hyperliquidService.cancelOrder(asset: assetId, orderId: order.oid) { success, message in
+      DispatchQueue.main.async {
+        self.isCancelling = false
+        
+        if success {
+          // Refresh data to remove cancelled order
+          self.hyperliquidService.fetchOpenOrders()
+        }
+        // Could add toast notification here for user feedback
       }
     }
   }
@@ -501,13 +545,13 @@ struct OpenOrderRow: View {
 
 // MARK: - Supporting Types
 
-enum TransactionFilter: CaseIterable {
-  case all, pending, confirmed, failed, buys, sells
+enum OrderFilter: CaseIterable {
+  case all, open, confirmed, failed, buys, sells
 
   var displayText: String {
     switch self {
     case .all: return "All"
-    case .pending: return "Pending"
+    case .open: return "Open"
     case .confirmed: return "Confirmed"
     case .failed: return "Failed"
     case .buys: return "Buys"
@@ -517,5 +561,5 @@ enum TransactionFilter: CaseIterable {
 }
 
 #Preview {
-  TransactionsView(hyperliquidService: HyperliquidService())
+  OrdersView(hyperliquidService: HyperliquidService())
 }

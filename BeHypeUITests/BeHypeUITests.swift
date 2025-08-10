@@ -38,7 +38,7 @@ final class BeHypeUITests: XCTestCase {
     testTradeScreen(app)
     testOrderPlacementFlow(app)
     testOrderTypeToggling(app)
-    testTransactionsScreen(app)
+    testOrdersScreen(app)
     testOpenOrdersAfterPlacement(app)
     testChartFromHome(app)
     testNavigationFlow(app)
@@ -48,32 +48,32 @@ final class BeHypeUITests: XCTestCase {
   // MARK: - Comprehensive Test Methods
   
   private func testOpenOrdersAfterPlacement(_ app: XCUIApplication) {
-    // This test verifies that placed orders appear in the Pending section
-    // Navigate to Transactions tab
-    app.tabBars.buttons["Transactions"].tap()
+    // This test verifies that placed orders appear in the Open section
+    // Navigate to Orders tab
+    app.tabBars.buttons["Orders"].tap()
     
     // Wait for screen to load
     XCTAssertTrue(
-      app.navigationBars["Transactions"].waitForExistence(timeout: 2),
-      "Transactions screen should load")
+      app.navigationBars["Orders"].waitForExistence(timeout: 2),
+      "Orders screen should load")
     
-    // Tap Pending filter to see open orders
-    let pendingFilter = app.buttons["Pending"]
-    if pendingFilter.exists {
-      pendingFilter.tap()
+    // Tap Open filter to see open orders
+    let openFilter = app.buttons["Open"]
+    if openFilter.exists {
+      openFilter.tap()
       
       // In mock mode, we should see mock open orders
       if app.launchArguments.contains("UITEST_MOCK_MODE") {
-        // Wait for potential pending orders to load
+        // Wait for potential open orders to load
         usleep(1000000) // 1 second for data to load
         
-        // Check for pending order indicators
-        let hasPendingContent = app.staticTexts["PENDING"].waitForExistence(timeout: 2) ||
-                               app.staticTexts.matching(
-                                 NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Pending'")
-                               ).count > 0
+        // Check for open order indicators
+        let hasOpenContent = app.staticTexts["OPEN"].waitForExistence(timeout: 2) ||
+                            app.staticTexts.matching(
+                              NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Open'")
+                            ).count > 0
         
-        XCTAssertTrue(hasPendingContent, "Pending filter should show open orders or appropriate empty state")
+        XCTAssertTrue(hasOpenContent, "Open filter should show open orders or appropriate empty state")
       }
     }
   }
@@ -397,21 +397,21 @@ final class BeHypeUITests: XCTestCase {
     // MARKET button doesn't exist in current TradeView implementation
   }
 
-  private func testTransactionsScreen(_ app: XCUIApplication) {
-    // Navigate to Transactions tab
-    let transactionsTab = app.tabBars.buttons["Transactions"]
-    XCTAssertTrue(transactionsTab.waitForExistence(timeout: 1), "Transactions tab should exist")
-    transactionsTab.tap()
+  private func testOrdersScreen(_ app: XCUIApplication) {
+    // Navigate to Orders tab
+    let ordersTab = app.tabBars.buttons["Orders"]
+    XCTAssertTrue(ordersTab.waitForExistence(timeout: 1), "Orders tab should exist")
+    ordersTab.tap()
 
-    // Wait for Transactions screen to load
+    // Wait for Orders screen to load
     XCTAssertTrue(
-      app.navigationBars["Transactions"].waitForExistence(timeout: 2),
-      "Transactions navigation should exist")
+      app.navigationBars["Orders"].waitForExistence(timeout: 2),
+      "Orders navigation should exist")
 
     // Wait for filter buttons to be rendered
     XCTAssertTrue(app.buttons["All"].waitForExistence(timeout: 1), "All filter should exist")
     XCTAssertTrue(
-      app.buttons["Pending"].waitForExistence(timeout: 1), "Pending filter should exist")
+      app.buttons["Open"].waitForExistence(timeout: 1), "Open filter should exist")
     XCTAssertTrue(
       app.buttons["Confirmed"].waitForExistence(timeout: 1), "Confirmed filter should exist")
     XCTAssertTrue(app.buttons["Failed"].waitForExistence(timeout: 1), "Failed filter should exist")
@@ -424,7 +424,7 @@ final class BeHypeUITests: XCTestCase {
                        app.staticTexts["No Transactions Yet"].waitForExistence(timeout: 1)
     let hasTransactionList = app.staticTexts["BTC/USDC"].waitForExistence(timeout: 1) ||
                             app.staticTexts["FILLED"].waitForExistence(timeout: 1) ||
-                            app.staticTexts["PENDING"].waitForExistence(timeout: 1)
+                            app.staticTexts["OPEN"].waitForExistence(timeout: 1)
     XCTAssertTrue(
       hasEmptyState || hasTransactionList, "Should show either empty state or transactions")
     
@@ -437,7 +437,7 @@ final class BeHypeUITests: XCTestCase {
   
   private func testTransactionFilters(_ app: XCUIApplication) {
     // Test each filter button
-    let filterButtons = ["All", "Pending", "Confirmed", "Failed", "Buys", "Sells"]
+    let filterButtons = ["All", "Open", "Confirmed", "Failed", "Buys", "Sells"]
     
     for filterName in filterButtons {
       let filterButton = app.buttons[filterName]
@@ -453,16 +453,16 @@ final class BeHypeUITests: XCTestCase {
         usleep(500000) // 0.5 seconds to allow UI to update
         
         switch filterName {
-        case "Pending":
-          // Pending filter should show open orders (PENDING badges)
-          let hasPendingOrders = app.staticTexts["PENDING"].waitForExistence(timeout: 1)
-          let hasNoPendingText = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Pending'")
+        case "Open":
+          // Open filter should show open orders (OPEN badges)
+          let hasOpenOrders = app.staticTexts["OPEN"].waitForExistence(timeout: 1)
+          let hasNoOpenText = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS 'No' AND label CONTAINS 'Open'")
           ).count > 0
           
-          if !hasPendingOrders && !hasNoPendingText {
-            // If no specific pending content, that's also valid (empty state)
-            XCTAssertTrue(true, "Pending filter handled appropriately")
+          if !hasOpenOrders && !hasNoOpenText {
+            // If no specific open content, that's also valid (empty state)
+            XCTAssertTrue(true, "Open filter handled appropriately")
           }
           
         case "Confirmed":
@@ -480,7 +480,7 @@ final class BeHypeUITests: XCTestCase {
         case "All":
           // All filter should show mixed content or appropriate empty state
           let hasAnyContent = app.staticTexts["FILLED"].exists ||
-                            app.staticTexts["PENDING"].exists ||
+                            app.staticTexts["OPEN"].exists ||
                             app.staticTexts["BTC/USDC"].exists
           let hasEmptyState = app.staticTexts.matching(
             NSPredicate(format: "label CONTAINS 'No'")
@@ -606,7 +606,7 @@ final class BeHypeUITests: XCTestCase {
   
   private func testNavigationFlow(_ app: XCUIApplication) {
     // Test tab navigation flow
-    let tabs = ["Home", "Trade", "Transactions"]
+    let tabs = ["Home", "Trade", "Orders"]
     
     for tab in tabs {
       let tabButton = app.tabBars.buttons[tab]

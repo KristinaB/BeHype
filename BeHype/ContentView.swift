@@ -32,17 +32,17 @@ struct ContentView: View {
           }
           .tag(1)
 
-        TransactionsView(hyperliquidService: hyperliquidService)
+        OrdersView(hyperliquidService: hyperliquidService)
           .tabItem {
             Image(systemName: "list.bullet.rectangle")
-            Text("Transactions")
+            Text("Orders")
           }
           .tag(2)
       }
       .accentColor(.primaryGradientStart)
     }
     .preferredColorScheme(.dark)
-    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToTransactionsTab"))) { _ in
+    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToOrdersTab"))) { _ in
       selectedTab = 2
     }
   }
