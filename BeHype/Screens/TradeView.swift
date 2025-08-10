@@ -55,7 +55,7 @@ struct TradeView: View {
                 }
             }
             .sheet(isPresented: $showingChart) {
-                ChartView(pair: pair)
+                CandlestickChartView(hyperliquidService: hyperliquidService)
             }
             .sheet(isPresented: $showingOrderConfirmation) {
                 OrderConfirmationView(
@@ -361,39 +361,6 @@ enum OrderType: CaseIterable {
     }
 }
 
-// MARK: - Chart View
-
-struct ChartView: View {
-    let pair: String
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                Color.appBackground
-                    .ignoresSafeArea()
-                
-                VStack {
-                    Text("Chart data will be implemented here")
-                        .secondaryText()
-                        .multilineTextAlignment(.center)
-                    
-                    Text("Currently showing: \(pair)")
-                        .captionText()
-                }
-            }
-            .navigationTitle("Chart")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-}
 
 // MARK: - Order Confirmation View
 
