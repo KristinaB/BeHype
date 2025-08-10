@@ -17,6 +17,8 @@ struct TradeView: View {
   @State private var isPlacingOrder = false
   @State private var showingOrderSuccess = false
   @State private var orderResult: SwapResult?
+  @State private var showingErrorAlert = false
+  @State private var errorMessage = ""
 
   private let pair = "BTC/USDC"
 
@@ -79,6 +81,11 @@ struct TradeView: View {
             // This will be handled by the parent view
           }
         )
+      }
+      .alert("Order Failed", isPresented: $showingErrorAlert) {
+        Button("OK") { }
+      } message: {
+        Text(errorMessage)
       }
     }
     .onAppear {
@@ -297,10 +304,37 @@ struct TradeView: View {
           self.amount = ""
           self.limitPrice = hyperliquidService.btcPrice
         } else {
-          // Could show error modal here too, for now just let the status show
+          // Process error message and show alert
+          self.errorMessage = self.processErrorMessage(result.message)
+          self.showingErrorAlert = true
           print("📋 [TradeView] Order failed: \(result.message)")
         }
       }
+    }
+  }
+  
+  // MARK: - Error Processing
+  
+  private func processErrorMessage(_ rawMessage: String) -> String {
+    // Handle insufficient balance errors with specific asset messages
+    if rawMessage.contains("Insufficient spot balance asset=10142") {
+      return "Insufficient BTC balance"
+    } else if rawMessage.contains("Insufficient spot balance") {
+      // Remove asset=xxxx pattern from error message
+      let cleanedMessage = rawMessage.replacingOccurrences(
+        of: " asset=\\d+", 
+        with: "", 
+        options: .regularExpression
+      )
+      return cleanedMessage
+    } else {
+      // For other errors, clean up any asset=xxxx patterns
+      let cleanedMessage = rawMessage.replacingOccurrences(
+        of: " asset=\\d+", 
+        with: "", 
+        options: .regularExpression
+      )
+      return cleanedMessage
     }
   }
 
