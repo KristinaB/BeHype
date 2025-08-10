@@ -86,11 +86,11 @@ struct OrdersView: View {
 
   private var transactionsList: some View {
     ScrollView {
-      LazyVStack(spacing: 12) {
+      VStack(spacing: 12) {  // Changed from LazyVStack to VStack to fix flicker
         ForEach(filteredItems, id: \.id) { item in
           switch item {
           case .fill(let fill):
-            FillRow(fill: fill)
+            FillRow(fill: fill, btcPrice: hyperliquidService.btcPrice)
               .padding(.horizontal)
           case .openOrder(let order):
             OpenOrderRow(order: order, hyperliquidService: hyperliquidService)
@@ -100,12 +100,10 @@ struct OrdersView: View {
         
         // Invisible spacer to ensure last item is always visible
         Color.clear
-          .frame(height: 20)
+          .frame(height: 100)
       }
       .padding(.top, 16)
-      .padding(.bottom, 0)
     }
-    .clipped() // Prevent content from extending beyond bounds
   }
 
   private var emptyStateView: some View {
@@ -308,6 +306,7 @@ struct OrdersView: View {
 
 struct FillRow: View {
   let fill: UserFill
+  let btcPrice: String
 
   var body: some View {
     AppCard {
@@ -396,7 +395,7 @@ struct FillRow: View {
             Spacer()
 
             if let fee = fill.fee, let feeToken = fill.feeToken {
-              Text("Fee: \(fee) \(feeToken)")
+              Text("Fee: \(formatFee(fee, token: feeToken))")
                 .captionText()
             }
           }
@@ -417,6 +416,29 @@ struct FillRow: View {
       // For sell orders, show USDC received
       let usdcReceived = sizeValue * priceValue
       return String(format: "%.2f USDC", usdcReceived)
+    }
+  }
+  
+  private func formatFee(_ fee: String, token: String) -> String {
+    guard let feeValue = Double(fee) else { return "\(fee) \(token)" }
+    
+    if token == "UBTC" || token == "BTC" {
+      // Convert BTC fee to USDC using current price
+      if let btcPriceValue = Double(btcPrice), btcPriceValue > 0 {
+        let usdcValue = feeValue * btcPriceValue
+        // Round to 3 decimal places for fees
+        return String(format: "%.3f USDC", usdcValue)
+      }
+    } else if token == "USDC" {
+      // Round USDC fees to 3 decimal places
+      return String(format: "%.3f USDC", feeValue)
+    }
+    
+    // Fallback: show original with proper rounding
+    if feeValue < 0.001 {
+      return String(format: "%.6f %@", feeValue, token)
+    } else {
+      return String(format: "%.3f %@", feeValue, token)
     }
   }
 }
