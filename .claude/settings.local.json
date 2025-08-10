@@ -29,7 +29,8 @@
       "Bash(cargo clean:*)",
       "Bash(grep:*)",
       "Bash(cargo swift package:*)",
-      "Bash(./target/release/test_sell_limit)"
+      "Bash(./target/release/test_sell_limit)",
+      "Bash(./target/release/test_price_rounding)"
     ],
     "deny": []
   }

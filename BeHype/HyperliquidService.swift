@@ -408,8 +408,8 @@ class HyperliquidService: ObservableObject {
                 let result: SwapResult
                 
                 // Round price to proper tick size for BTC/USDC (@142)
-                // BTC/USDC has $0.50 tick size based on market data
-                let roundedLimitPrice = self.roundPriceToTickSize(price: limitPrice, tickSize: 0.5)
+                // BTC/USDC has $1.00 tick size based on testing
+                let roundedLimitPrice = self.roundPriceToTickSize(price: limitPrice, tickSize: 1.0)
                 print("📏 [DEBUG] Price rounded from $\(limitPrice) to $\(roundedLimitPrice) for tick size compliance")
                 
                 // Round BTC amount to 5 decimal places for precision compliance
@@ -629,7 +629,7 @@ class HyperliquidService: ObservableObject {
     private func roundPriceToTickSize(price: String, tickSize: Double) -> String {
         guard let priceDouble = Double(price) else { return price }
         let rounded = (priceDouble / tickSize).rounded() * tickSize
-        return String(format: "%.1f", rounded)
+        return String(format: "%.0f", rounded)  // Format as whole dollars for $1 tick size
     }
     
     private func roundBtcAmount(amount: String) -> String {
