@@ -22,7 +22,7 @@ class MockManager {
         static let successfulBuyOrder = SwapResult(
             success: true,
             message: "Buy order placed successfully",
-            orderId: "130243366999",
+            orderId: 130243366999,
             filledSize: "0.00009",
             avgPrice: "118225"
         )
@@ -30,7 +30,7 @@ class MockManager {
         static let successfulSellOrder = SwapResult(
             success: true,
             message: "Sell order filled",
-            orderId: "130243367000",
+            orderId: 130243367000,
             filledSize: "0.00008", 
             avgPrice: "118225"
         )

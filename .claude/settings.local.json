@@ -31,7 +31,8 @@
       "Bash(cargo swift package:*)",
       "Bash(./target/release/test_sell_limit)",
       "Bash(./target/release/test_price_rounding)",
-      "Bash(./target/release/test_real_market_sell:*)"
+      "Bash(./target/release/test_real_market_sell:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
