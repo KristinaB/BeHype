@@ -398,34 +398,51 @@ class HyperliquidService: ObservableObject {
                 }
             }
         } else {
-            // Simulate limit order placement for other amounts
-            print("⚠️ [DEBUG] Simulating limit order (framework rebuild needed for full functionality)")
+            // Use real limit order methods from rebuilt framework
+            print("🔄 [DEBUG] Placing real limit order using Rust SDK...")
             
             isLoading = true
-            status = "🔄 Simulating \(orderType == .buy ? "buy" : "sell") order..."
+            status = "🔄 Placing \(orderType == .buy ? "buy" : "sell") limit order..."
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.isLoading = false
+            DispatchQueue.global(qos: .background).async {
+                let result: SwapResult
                 
-                let simulatedOrderId = UInt64.random(in: 1000000...9999999)
-                let result = SwapResult(
-                    success: true,
-                    message: "Limit order simulated (framework rebuild needed for live trading)",
-                    orderId: simulatedOrderId,
-                    filledSize: nil,
-                    avgPrice: nil
-                )
+                if orderType == .buy {
+                    // For buy orders, amount is in USDC, convert BTC at limit price
+                    result = walletClient.placeBtcBuyOrder(usdcAmount: amount, limitPrice: limitPrice)
+                } else {
+                    // For sell orders, amount is in BTC, sell at limit price
+                    result = walletClient.placeBtcSellOrder(btcAmount: amount, limitPrice: limitPrice)
+                }
                 
-                var resultText = "⚠️ \(orderType == .buy ? "Buy" : "Sell") order simulated!\n"
-                resultText += "Amount: \(amount) \(orderType == .buy ? "USDC" : "BTC")\n"
-                resultText += "Limit Price: $\(limitPrice)\n"
-                resultText += "Simulated Order ID: \(simulatedOrderId)\n"
-                resultText += "Note: Framework rebuild needed for live limit orders"
-                
-                self.status = "⚠️ \(orderType == .buy ? "Buy" : "Sell") order simulated"
-                self.lastSwapResult = resultText
-                
-                completion(result)
+                DispatchQueue.main.async {
+                    self.isLoading = false
+                    
+                    if result.success {
+                        var resultText = "✅ \(orderType == .buy ? "Buy" : "Sell") order placed successfully!\n"
+                        resultText += "Message: \(result.message)\n"
+                        if let orderId = result.orderId {
+                            resultText += "Order ID: \(orderId)\n"
+                        }
+                        if let filledSize = result.filledSize {
+                            resultText += "Filled Size: \(filledSize)\n"
+                        }
+                        if let avgPrice = result.avgPrice {
+                            resultText += "Average Price: $\(avgPrice)\n"
+                        }
+                        
+                        self.status = resultText
+                        self.lastSwapResult = resultText
+                        
+                        // Refresh balance after successful order
+                        self.checkBalance()
+                    } else {
+                        self.status = "❌ Order failed: \(result.message)"
+                        self.lastSwapResult = "❌ Failed: \(result.message)"
+                    }
+                    
+                    completion(result)
+                }
             }
         }
     }
