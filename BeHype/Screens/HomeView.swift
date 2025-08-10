@@ -326,9 +326,6 @@ struct DebugActionsView: View {
               hyperliquidService.getCandleData()
             }
 
-            SecondaryButton("🧪 Test getAllMids", isLoading: hyperliquidService.isLoading) {
-              hyperliquidService.debugGetAllMids()
-            }
 
             if Double(hyperliquidService.usdcBalance) ?? 0 >= 11 {
               PrimaryButton(

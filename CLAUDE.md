@@ -99,6 +99,12 @@ BeHype is a professional SwiftUI trading app with four main screens:
 - SwiftUI screens integrate with existing HyperliquidService
 - All trading functionality works with real Hyperliquid mainnet
 
+### Code Formatting Guidelines:
+- **Numeric literals**: Use underscores for large numbers for readability (e.g., `130_243_366_999`)
+- **Multi-line parameters**: Format function parameters across multiple lines when appropriate
+- **Consistent spacing**: Maintain consistent spacing and alignment throughout Swift files
+- **Code structure**: Ensure proper organization and indentation consistency
+
 ### Trading Features:
 - **Limit Orders**: Full buy/sell limit order functionality implemented
   - HyperliquidService has `placeLimitOrder()`, `placeBuyOrder()`, `placeSellOrder()` methods
