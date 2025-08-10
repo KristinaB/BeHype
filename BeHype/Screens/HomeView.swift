@@ -326,7 +326,6 @@ struct DebugActionsView: View {
               hyperliquidService.getCandleData()
             }
 
-
             if Double(hyperliquidService.usdcBalance) ?? 0 >= 11 {
               PrimaryButton(
                 "🔄 Swap $11 USDC → BTC",

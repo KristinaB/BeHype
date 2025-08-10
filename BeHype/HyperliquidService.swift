@@ -25,40 +25,40 @@ class HyperliquidService: ObservableObject {
   @Published var marketDataService: MarketDataService
   @Published var tradingService: TradingService
   @Published var transactionService: TransactionService
-  
+
   // Computed properties for backward compatibility
   var status: String {
     return walletService.status.isEmpty ? marketDataService.status : walletService.status
   }
-  
+
   var isLoading: Bool {
     return walletService.isLoading || marketDataService.isLoading || tradingService.isLoading
   }
-  
+
   var exchangeAssets: Int {
     return marketDataService.exchangeAssets
   }
-  
+
   var usdcBalance: String {
     return walletService.usdcBalance
   }
-  
+
   var btcBalance: String {
     return walletService.btcBalance
   }
-  
+
   var btcPrice: String {
     return marketDataService.btcPrice
   }
-  
+
   var lastSwapResult: String {
     return tradingService.lastSwapResult
   }
-  
+
   var userFills: [UserFill] {
     return transactionService.userFills
   }
-  
+
   var walletAddress: String {
     return walletService.walletAddress
   }
@@ -111,47 +111,47 @@ class HyperliquidService: ObservableObject {
   }
 
   // MARK: - Trading Delegation Methods
-  
+
   func placeLimitOrder(
-    orderType: OrderType, 
-    amount: String, 
+    orderType: OrderType,
+    amount: String,
     limitPrice: String,
     completion: @escaping (SwapResult) -> Void
   ) {
     tradingService.placeLimitOrder(
-      orderType: orderType, 
-      amount: amount, 
-      limitPrice: limitPrice, 
+      orderType: orderType,
+      amount: amount,
+      limitPrice: limitPrice,
       completion: completion
     )
   }
-  
+
   func placeBuyOrder(
-    usdcAmount: String, 
-    limitPrice: String, 
+    usdcAmount: String,
+    limitPrice: String,
     completion: @escaping (SwapResult) -> Void
   ) {
     tradingService.placeBuyOrder(
-      usdcAmount: usdcAmount, 
-      limitPrice: limitPrice, 
+      usdcAmount: usdcAmount,
+      limitPrice: limitPrice,
       completion: completion
     )
   }
-  
+
   func placeSellOrder(
-    btcAmount: String, 
-    limitPrice: String, 
+    btcAmount: String,
+    limitPrice: String,
     completion: @escaping (SwapResult) -> Void
   ) {
     tradingService.placeSellOrder(
-      btcAmount: btcAmount, 
-      limitPrice: limitPrice, 
+      btcAmount: btcAmount,
+      limitPrice: limitPrice,
       completion: completion
     )
   }
 
   // MARK: - Transaction Delegation Methods
-  
+
   func fetchUserFills(daysBack: Int = 30) {
     transactionService.fetchUserFills(daysBack: daysBack)
   }
