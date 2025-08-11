@@ -12,6 +12,7 @@ struct HomeView: View {
   @State private var showingDebugActions = false
   @State private var showingChart = false
   @State private var showingFundWallet = false
+  @State private var selectedAsset: AssetData?
 
   var body: some View {
     NavigationView {
@@ -29,6 +30,9 @@ struct HomeView: View {
 
             // Market Data
             marketDataSection
+
+            // Asset Selector
+            assetSelectorSection
 
             // NOTE: Nice UI sections but at the moment we don't need them
 
@@ -103,7 +107,7 @@ struct HomeView: View {
         Text("BeHype")
           .brandText()
 
-        Text("Hyperliquid Trading")
+        Text("Open Source Swift Hyperliquid Trading App")
           .secondaryText()
       }
 
@@ -177,6 +181,133 @@ struct HomeView: View {
         //   change: "Available",
         //   isPositive: true
         // )
+      }
+    }
+  }
+
+  private var assetSelectorSection: some View {
+    VStack(spacing: 16) {
+      HStack {
+        Text("Switch to Asset")
+          .sectionTitle()
+        Spacer()
+
+        if !hyperliquidService.availableAssets.isEmpty {
+          Text("\(hyperliquidService.availableAssets.count) available")
+            .captionText()
+            .foregroundColor(.tertiaryText)
+        }
+      }
+
+      AppCard {
+        VStack(spacing: 16) {
+          if hyperliquidService.availableAssets.isEmpty {
+            HStack {
+              ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .primaryGradientStart))
+                .scaleEffect(0.8)
+              Text("Loading assets...")
+                .secondaryText()
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+          } else {
+            VStack(spacing: 12) {
+              HStack {
+                Text("Choose an asset to trade:")
+                  .inputLabel()
+                Spacer()
+              }
+
+              // Use Menu for asset selection
+              Menu {
+                ForEach(hyperliquidService.availableAssets, id: \.id) { asset in
+                  Button(action: {
+                    selectedAsset = asset
+                    print("📊 [HomeView] Selected asset: \(asset.name) - $\(asset.price)")
+                  }) {
+                    Label {
+                      HStack {
+                        Text(asset.name)
+                        Spacer()
+                        Text("$\(asset.price)")
+                      }
+                    } icon: {
+                      EmptyView()
+                    }
+                  }
+                }
+              } label: {
+                HStack {
+                  VStack(alignment: .leading, spacing: 4) {
+                    if let selectedAsset = selectedAsset {
+                      Text(selectedAsset.name)
+                        .font(.body)
+                        .foregroundColor(.primaryText)
+                      Text("$\(selectedAsset.price)")
+                        .font(.caption)
+                        .foregroundColor(.bullishGreen)
+                    } else {
+                      Text("Select an asset...")
+                        .foregroundColor(.tertiaryText)
+                    }
+                  }
+
+                  Spacer()
+
+                  Image(systemName: "chevron.down")
+                    .font(.caption)
+                    .foregroundColor(.primaryGradientStart)
+                }
+                .padding()
+                .background(Color.inputBackground)
+                .overlay(
+                  RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                      LinearGradient(
+                        colors: [
+                          Color.primaryGradientStart.opacity(0.3),
+                          Color.primaryGradientEnd.opacity(0.3),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                      ),
+                      lineWidth: 1
+                    )
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+              }
+              .menuStyle(DefaultMenuStyle())
+              
+              // Switch Asset Button
+              if let selectedAsset = selectedAsset {
+                VStack(spacing: 8) {
+                  Divider()
+                    .background(Color.borderGray.opacity(0.3))
+                  
+                  OutlineButton(
+                    "Switch to \(selectedAsset.name)",
+                    icon: "arrow.triangle.2.circlepath",
+                    size: .medium
+                  ) {
+                    // Confirmation action - currently does nothing
+                    print("📊 [HomeView] User confirmed switch to \(selectedAsset.name) at $\(selectedAsset.price)")
+                    
+                    // TODO: Implement asset switching logic here
+                    // This could update the trading pair in TradeView, 
+                    // change the main market display, etc.
+                  }
+                  
+                  Text("This will switch the main trading pair")
+                    .captionText()
+                    .foregroundColor(.tertiaryText)
+                    .multilineTextAlignment(.center)
+                }
+                .padding(.top, 8)
+              }
+            }
+          }
+        }
       }
     }
   }

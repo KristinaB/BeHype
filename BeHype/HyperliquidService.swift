@@ -53,6 +53,10 @@ class HyperliquidService: ObservableObject {
   var btcPrice: String {
     return marketDataService.btcPrice
   }
+  
+  var availableAssets: [AssetData] {
+    return marketDataService.availableAssets
+  }
 
   var lastSwapResult: String {
     return tradingService.lastSwapResult
