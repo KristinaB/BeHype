@@ -21,7 +21,7 @@ struct OrdersView: View {
         VStack(spacing: 0) {
           // Filter and Search
           filterSection
-          
+
           // Transaction List
           if filteredItems.isEmpty {
             emptyStateView
@@ -97,7 +97,7 @@ struct OrdersView: View {
               .padding(.horizontal)
           }
         }
-        
+
         // Invisible spacer to ensure last item is always visible
         Color.clear
           .frame(height: 100)
@@ -144,11 +144,11 @@ struct OrdersView: View {
   }
 
   // MARK: - Transaction Item Types
-  
+
   enum TransactionItem: Identifiable {
     case fill(UserFill)
     case openOrder(OpenOrder)
-    
+
     var id: String {
       switch self {
       case .fill(let fill):
@@ -157,7 +157,7 @@ struct OrdersView: View {
         return "order_\(order.oid)"
       }
     }
-    
+
     var timestamp: UInt64 {
       switch self {
       case .fill(let fill):
@@ -172,7 +172,7 @@ struct OrdersView: View {
 
   private var filteredItems: [TransactionItem] {
     var items: [TransactionItem] = []
-    
+
     // Add fills based on filter
     let fills = hyperliquidService.userFills.filter { fill in
       switch selectedFilter {
@@ -189,7 +189,7 @@ struct OrdersView: View {
       }
     }
     items.append(contentsOf: fills.map { TransactionItem.fill($0) })
-    
+
     // Add open orders based on filter
     let orders = hyperliquidService.openOrders.filter { order in
       switch selectedFilter {
@@ -204,25 +204,25 @@ struct OrdersView: View {
       }
     }
     items.append(contentsOf: orders.map { TransactionItem.openOrder($0) })
-    
+
     // Apply search filter
     let filtered = items.filter { item in
       if !searchText.isEmpty {
         let searchLower = searchText.lowercased()
         switch item {
         case .fill(let fill):
-          return fill.displayCoin.lowercased().contains(searchLower) ||
-                 fill.hash.lowercased().contains(searchLower) ||
-                 fill.displaySide.lowercased().contains(searchLower)
+          return fill.displayCoin.lowercased().contains(searchLower)
+            || fill.hash.lowercased().contains(searchLower)
+            || fill.displaySide.lowercased().contains(searchLower)
         case .openOrder(let order):
-          return order.displayCoin.lowercased().contains(searchLower) ||
-                 String(order.oid).contains(searchLower) ||
-                 order.displaySide.lowercased().contains(searchLower)
+          return order.displayCoin.lowercased().contains(searchLower)
+            || String(order.oid).contains(searchLower)
+            || order.displaySide.lowercased().contains(searchLower)
         }
       }
       return true
     }
-    
+
     // Sort by timestamp (newest first)
     return filtered.sorted { $0.timestamp > $1.timestamp }
   }
@@ -265,7 +265,7 @@ struct OrdersView: View {
   }
 
   // MARK: - Private Methods
-  
+
   private func refreshData() {
     hyperliquidService.fetchUserFills()
     hyperliquidService.fetchOpenOrders()
@@ -322,21 +322,15 @@ struct FillRow: View {
               .fill((fill.isBuy ? Color.bullishGreen : Color.bearishRed).opacity(0.2))
               .frame(width: 40, height: 40)
 
-            Image(systemName: fill.isBuy ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+            Image(systemName: fill.isBuy ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
               .font(.headline)
               .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
           }
 
-          Text("FILLED")
-            .font(.caption2)
+          Text(fill.displaySide.uppercased())
+            .font(.caption)
             .fontWeight(.bold)
-            .foregroundColor(.bullishGreen)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(
-              RoundedRectangle(cornerRadius: 4)
-                .fill(Color.bullishGreen.opacity(0.2))
-            )
+            .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
         }
 
         // Fill Details
@@ -347,10 +341,17 @@ struct FillRow: View {
 
             Spacer()
 
-            Text(fill.displaySide.uppercased())
-              .font(.caption)
+            Text("FILLED")
+              .font(.caption2)
               .fontWeight(.bold)
-              .foregroundColor(fill.isBuy ? .bullishGreen : .bearishRed)
+              .foregroundColor(.bullishGreen)
+              .padding(.horizontal, 6)
+              .padding(.vertical, 2)
+              .background(
+                RoundedRectangle(cornerRadius: 4)
+                  .fill(Color.bullishGreen.opacity(0.2))
+              )
+
           }
 
           VStack(spacing: 8) {
@@ -376,10 +377,10 @@ struct FillRow: View {
                   .fontWeight(.medium)
               }
             }
-            
+
             // Value on separate line
             HStack {
-              VStack(alignment: .leading, spacing: 4) {
+              VStack(alignment: .leading, spacing: 10) {
                 Text("Value")
                   .captionText()
 
@@ -387,7 +388,7 @@ struct FillRow: View {
                   .priceText()
                   .font(.subheadline)
               }
-              
+
               Spacer()
             }
           }
@@ -422,10 +423,10 @@ struct FillRow: View {
       return String(format: "%.2f USDC", usdcReceived)
     }
   }
-  
+
   private func formatFee(_ fee: String, token: String) -> String {
     guard let feeValue = Double(fee) else { return "\(fee) \(token)" }
-    
+
     if token == "UBTC" || token == "BTC" {
       // Convert BTC fee to USDC using current price
       if let btcPriceValue = Double(btcPrice), btcPriceValue > 0 {
@@ -437,7 +438,7 @@ struct FillRow: View {
       // Round USDC fees to 3 decimal places
       return String(format: "%.3f USDC", feeValue)
     }
-    
+
     // Fallback: show original with proper rounding
     if feeValue < 0.001 {
       return String(format: "%.6f %@", feeValue, token)
@@ -454,7 +455,7 @@ struct OpenOrderRow: View {
   @ObservedObject var hyperliquidService: HyperliquidService
   @State private var showingCancelConfirmation = false
   @State private var isCancelling = false
-  
+
   var body: some View {
     AppCard {
       HStack {
@@ -464,12 +465,12 @@ struct OpenOrderRow: View {
             Circle()
               .fill(Color.primaryGradientStart.opacity(0.2))
               .frame(width: 40, height: 40)
-            
+
             Image(systemName: "clock.fill")
               .font(.headline)
               .foregroundColor(.primaryGradientStart)
           }
-          
+
           Text("OPEN")
             .font(.caption2)
             .fontWeight(.bold)
@@ -481,70 +482,70 @@ struct OpenOrderRow: View {
                 .fill(Color.primaryGradientStart.opacity(0.2))
             )
         }
-        
+
         // Order Details
         VStack(alignment: .leading, spacing: 8) {
           HStack {
             Text(order.displayCoin)
               .cardTitle()
-            
+
             Spacer()
-            
+
             Text(order.displaySide.uppercased())
               .font(.caption)
               .fontWeight(.bold)
               .foregroundColor(order.side == "B" ? .bullishGreen : .bearishRed)
           }
-          
+
           HStack {
             VStack(alignment: .leading, spacing: 4) {
               Text("Size")
                 .captionText()
-              
+
               Text("\(order.sz) \(order.side == "B" ? "USDC" : "BTC")")
                 .secondaryText()
                 .fontWeight(.medium)
             }
-            
+
             Spacer()
-            
+
             VStack(alignment: .trailing, spacing: 4) {
               Text("Limit Price")
                 .captionText()
-              
+
               Text("$\(order.limitPx)")
                 .secondaryText()
                 .fontWeight(.medium)
             }
-            
+
             Spacer()
-            
+
             VStack(alignment: .trailing, spacing: 4) {
               Text("Type")
                 .captionText()
-              
+
               Text(order.displayOrderType)
                 .priceText()
                 .font(.subheadline)
             }
           }
-          
+
           HStack {
             Text(order.displayDate)
               .captionText()
-            
+
             Spacer()
-            
+
             Text("TIF: \(order.tif)")
               .captionText()
           }
-          
+
           // Cancel Button
           HStack {
             Spacer()
-            
+
             SmallButton(
-              isCancelling ? "Cancelling..." : "Cancel Order", 
+              isCancelling ? "Cancelling..." : "Cancel Order",
               icon: isCancelling ? "clock" : "xmark.circle"
             ) {
               showingCancelConfirmation = true
@@ -556,7 +557,7 @@ struct OpenOrderRow: View {
       }
     }
     .alert("Cancel Order", isPresented: $showingCancelConfirmation) {
-      Button("Cancel", role: .cancel) { }
+      Button("Cancel", role: .cancel) {}
       Button("Confirm", role: .destructive) {
         performCancelOrder()
       }
@@ -564,17 +565,17 @@ struct OpenOrderRow: View {
       Text("Are you sure you want to cancel this order?")
     }
   }
-  
+
   private func performCancelOrder() {
     isCancelling = true
-    
+
     // Use the asset string directly (e.g., "@142" for BTC/USDC)
     let assetString = order.coin
-    
+
     hyperliquidService.cancelOrder(asset: assetString, orderId: order.oid) { success, message in
       DispatchQueue.main.async {
         self.isCancelling = false
-        
+
         if success {
           // Refresh data to remove cancelled order
           self.hyperliquidService.fetchOpenOrders()

@@ -83,7 +83,7 @@ struct TradeView: View {
         )
       }
       .alert("Order Failed", isPresented: $showingErrorAlert) {
-        Button("OK") { }
+        Button("OK") {}
       } message: {
         Text(errorMessage)
       }
@@ -143,7 +143,9 @@ struct TradeView: View {
           Button(action: { orderType = .buy }) {
             Text("BUY")
               .smallButtonText()
-              .foregroundColor(orderType == .buy ? Color(red: 0.2, green: 0.7, blue: 0.5) : .secondaryText)
+              .foregroundColor(
+                orderType == .buy ? Color(red: 0.2, green: 0.7, blue: 0.5) : .secondaryText
+              )
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
               .background(Color.inputBackground)
@@ -174,7 +176,9 @@ struct TradeView: View {
           Button(action: { orderType = .sell }) {
             Text("SELL")
               .smallButtonText()
-              .foregroundColor(orderType == .sell ? Color(red: 0.7, green: 0.2, blue: 0.2) : .secondaryText)
+              .foregroundColor(
+                orderType == .sell ? Color(red: 0.7, green: 0.2, blue: 0.2) : .secondaryText
+              )
               .frame(maxWidth: .infinity)
               .padding(.vertical, 12)
               .background(Color.inputBackground)
@@ -283,16 +287,12 @@ struct TradeView: View {
       ) {
         placeOrder()
       }
-
-      Text("⚠️ Trading with real funds on mainnet")
-        .captionText()
-        .foregroundColor(.warningOrange)
     }
   }
-  
+
   private func placeOrder() {
     isPlacingOrder = true
-    
+
     // Use new limit order functionality
     hyperliquidService.placeLimitOrder(
       orderType: orderType,
@@ -302,11 +302,11 @@ struct TradeView: View {
       DispatchQueue.main.async {
         self.isPlacingOrder = false
         self.orderResult = result
-        
+
         if result.success {
           // Show success modal
           self.showingOrderSuccess = true
-          
+
           // Clear the form
           self.amount = ""
           self.limitPrice = hyperliquidService.btcPrice
@@ -319,9 +319,9 @@ struct TradeView: View {
       }
     }
   }
-  
+
   // MARK: - Error Processing
-  
+
   private func processErrorMessage(_ rawMessage: String) -> String {
     // Handle insufficient balance errors with specific asset messages
     if rawMessage.contains("Insufficient spot balance asset=10142") {
@@ -329,16 +329,16 @@ struct TradeView: View {
     } else if rawMessage.contains("Insufficient spot balance") {
       // Remove asset=xxxx pattern from error message
       let cleanedMessage = rawMessage.replacingOccurrences(
-        of: " asset=\\d+", 
-        with: "", 
+        of: " asset=\\d+",
+        with: "",
         options: .regularExpression
       )
       return cleanedMessage
     } else {
       // For other errors, clean up any asset=xxxx patterns
       let cleanedMessage = rawMessage.replacingOccurrences(
-        of: " asset=\\d+", 
-        with: "", 
+        of: " asset=\\d+",
+        with: "",
         options: .regularExpression
       )
       return cleanedMessage
@@ -496,13 +496,13 @@ struct OrderSuccessView: View {
   let orderResult: SwapResult?
   let onDone: () -> Void
   @Environment(\.dismiss) private var dismiss
-  
+
   var body: some View {
     NavigationView {
       ZStack {
         Color.appBackground
           .ignoresSafeArea()
-        
+
         VStack(spacing: 32) {
           // Success Icon
           ZStack {
@@ -518,36 +518,37 @@ struct OrderSuccessView: View {
                 )
               )
               .frame(width: 100, height: 100)
-            
+
             Image(systemName: "checkmark.circle.fill")
               .font(.system(size: 50, weight: .medium))
-              .foregroundStyle(LinearGradient(
-                colors: [.bullishGreen, .green],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-              ))
+              .foregroundStyle(
+                LinearGradient(
+                  colors: [.bullishGreen, .green],
+                  startPoint: .topLeading,
+                  endPoint: .bottomTrailing
+                ))
           }
-          
+
           VStack(spacing: 16) {
             Text("Order Placed Successfully!")
               .brandText()
               .multilineTextAlignment(.center)
-            
+
             if let result = orderResult {
               AppCard {
                 VStack(spacing: 12) {
                   Text("Order Details")
                     .cardTitle()
-                  
+
                   VStack(spacing: 8) {
                     if let orderId = result.orderId {
                       InfoRow(title: "Order ID", value: String(orderId))
                     }
-                    
+
                     if let filledSize = result.filledSize, !filledSize.isEmpty {
                       InfoRow(title: "Filled Size", value: "\(filledSize) BTC")
                       InfoRow(title: "Status", value: "✅ Filled", color: .bullishGreen)
-                      
+
                       if let avgPrice = result.avgPrice {
                         InfoRow(title: "Average Price", value: "$\(avgPrice)")
                       }
@@ -563,7 +564,7 @@ struct OrderSuccessView: View {
               }
             }
           }
-          
+
           VStack(spacing: 12) {
             OutlineButton("View Orders", size: .large) {
               onDone()
@@ -574,12 +575,12 @@ struct OrderSuccessView: View {
                 object: nil
               )
             }
-            
+
             SecondaryButton("Close") {
               dismiss()
             }
           }
-          
+
           Spacer()
         }
         .padding()
