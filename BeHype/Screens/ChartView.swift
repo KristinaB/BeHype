@@ -105,7 +105,7 @@ struct CandlestickChartView: View {
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
-          Button("Done") {
+          Button("Back") {
             dismiss()
           }
           .foregroundColor(.primaryText)

@@ -191,12 +191,6 @@ struct HomeView: View {
         Text("Switch to Asset")
           .sectionTitle()
         Spacer()
-
-        if !hyperliquidService.availableAssets.isEmpty {
-          Text("\(hyperliquidService.availableAssets.count) available")
-            .captionText()
-            .foregroundColor(.tertiaryText)
-        }
       }
 
       AppCard {
@@ -213,12 +207,6 @@ struct HomeView: View {
             .padding()
           } else {
             VStack(spacing: 12) {
-              HStack {
-                Text("Choose an asset to trade:")
-                  .inputLabel()
-                Spacer()
-              }
-
               // Use Menu for asset selection
               Menu {
                 ForEach(hyperliquidService.availableAssets, id: \.id) { asset in
@@ -278,26 +266,28 @@ struct HomeView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
               }
               .menuStyle(DefaultMenuStyle())
-              
+
               // Switch Asset Button
               if let selectedAsset = selectedAsset {
                 VStack(spacing: 8) {
                   Divider()
                     .background(Color.borderGray.opacity(0.3))
-                  
+
                   OutlineButton(
                     "Switch to \(selectedAsset.name)",
                     icon: "arrow.triangle.2.circlepath",
                     size: .medium
                   ) {
                     // Confirmation action - currently does nothing
-                    print("📊 [HomeView] User confirmed switch to \(selectedAsset.name) at $\(selectedAsset.price)")
-                    
+                    print(
+                      "📊 [HomeView] User confirmed switch to \(selectedAsset.name) at $\(selectedAsset.price)"
+                    )
+
                     // TODO: Implement asset switching logic here
-                    // This could update the trading pair in TradeView, 
+                    // This could update the trading pair in TradeView,
                     // change the main market display, etc.
                   }
-                  
+
                   Text("This will switch the main trading pair")
                     .captionText()
                     .foregroundColor(.tertiaryText)
