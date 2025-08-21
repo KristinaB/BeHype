@@ -188,7 +188,7 @@ struct HomeView: View {
   private var assetSelectorSection: some View {
     VStack(spacing: 16) {
       HStack {
-        Text("Switch to Asset")
+        Text("Switch Asset")
           .sectionTitle()
         Spacer()
       }
