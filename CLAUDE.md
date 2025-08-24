@@ -1,5 +1,6 @@
 # CLAUDE.md - BeHype iOS Project
 
+
 ## BeHype iOS Project Setup
 
 This project integrates Hyperliquid Rust SDK into iOS. Key setup requirements:
