@@ -259,20 +259,17 @@ service.placeLimitOrder(
 
 ### **Phase 1: Enhanced Trading** ⏳
 - [ ] Advanced order types (Stop-loss, Take-profit)
-- [ ] Multi-asset support beyond BTC/USDC
+- [ ] Full Multi-asset support as planned
 - [ ] Push notifications for order fills
-- [ ] Apple Watch companion app
 
 ### **Phase 2: Social Features** 📱
 - [ ] Share trading positions via social media
 - [ ] Leaderboards and trading challenges
-- [ ] In-app trading education and tutorials
 - [ ] Community features and trader profiles
 
 ### **Phase 3: Ecosystem Expansion** 🌍
 - [ ] iPad optimization with advanced charts
 - [ ] macOS Catalyst version  
-- [ ] SDK packages for React Native and Flutter
 - [ ] White-label solutions for other projects
 
 ---
@@ -284,8 +281,8 @@ service.placeLimitOrder(
 | **Public Goods Track** | **Hyperliquid Frontier Track** |
 |------------------------|--------------------------------|
 | ✅ **Quality**: Production-ready architecture | ✅ **Quality**: Polished mobile experience |
-| ✅ **Ecosystem Usefulness**: Complete iOS SDK | ✅ **Ecosystem Impact**: New user segment |
-| ✅ **Documentation**: Comprehensive guides | ✅ **Cultural Growth**: Mobile-first DeFi |
+| ✅ **Ecosystem Usefulness**: Good base for iOS SDK | ✅ **Ecosystem Impact**: New user segment |
+| ✅ **Documentation**: Self documenting code example | ✅ **Cultural Growth**: Mobile-first DeFi |
 
 **Key Differentiators:**
 - **Real Integration**: Actually works on Hyperliquid mainnet (not just a mockup)
