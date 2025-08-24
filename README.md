@@ -7,6 +7,8 @@
 [![Hyperliquid](https://img.shields.io/badge/Hyperliquid-DEX-purple?style=for-the-badge)](https://hyperliquid.xyz)
 [![SwiftUI](https://img.shields.io/badge/SwiftUI-iOS-orange?style=for-the-badge)](https://developer.apple.com/xcode/swiftui/)
 
+[🚀 HACKATHON SUBMISSION on TAIKAI](https://taikai.network/hl-hackathon-organizers/hackathons/hl-hackathon/projects/cmdztq3zy00jqfiuhf0a5t1of/idea)
+
 **🏆 Hyperliquid Hackathon Entry**  
 **🥇 Competing in: Public Goods Track + Hyperliquid Frontier Track**
 
