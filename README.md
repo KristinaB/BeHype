@@ -321,6 +321,18 @@ service.placeLimitOrder(
 
 ---
 
+## 📷 Screenshots
+
+![](https://storage.googleapis.com/taikai-storage/images/57e5d7b0-8121-11f0-a2a6-d7b61630f48f1%20-%20app%20screenshots%20-%20home%20screen%20and%20charts.png)
+
+![](https://storage.googleapis.com/taikai-storage/images/59e689b0-8121-11f0-a2a6-d7b61630f48f2%20-%20app%20screenshots%20-%20switch%20asset%20functionality.png)
+
+![](https://storage.googleapis.com/taikai-storage/images/5bbf6860-8121-11f0-a2a6-d7b61630f48f3%20-%20app%20screenshots%20-%20place%20limit%20order%20-%20main%20flow.png)
+
+![](https://storage.googleapis.com/taikai-storage/images/5db91580-8121-11f0-a2a6-d7b61630f48f4%20-%20app%20screenshots%20-%20cancel%20order%20and%20order%20filtering.png)
+
+---
+
 <div align="center">
 
 **🏆 BeHype - Bringing Professional Mobile Trading to Hyperliquid DEX**
