@@ -110,8 +110,6 @@ graph TD
     B --> C[Swift Framework Layer]
     C --> D[Service Architecture]
     D --> E[SwiftUI Views]
-    D --> F[Real-time Updates]
-    E --> G[Professional Mobile UI]
 ```
 
 #### **🦀 Rust Foundation**
